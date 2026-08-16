@@ -1,0 +1,117 @@
+{%- liquid
+  comment
+    Format the dates first: a filter chained after `t:` would be applied
+    to the translated string rather than to the date.
+  endcomment
+  assign placed_on = order.created_at | date: format: 'date'
+  assign cancelled_on = order.cancelled_at | date: format: 'date'
+-%}
+
+<div class="wrap account">
+  <div class="page-head">
+    <p class="crumb"><a href="{{ routes.account_url }}">{{ 'customer.account.return' | t }}</a></p>
+    <h1 class="dsp" style="font-size: calc(clamp(30px, 3.6vw, 48px) * var(--type-scale));">
+      {{ 'customer.order.title' | t: name: order.name }}
+    </h1>
+    <p class="article-meta" style="margin-top: 14px;">
+      {{ 'customer.order.date' | t: date: placed_on }}
+    </p>
+    {%- if order.cancelled -%}
+      <p class="form-error">
+        {{ 'customer.order.cancelled' | t: date: cancelled_on }}
+        {%- if order.cancel_reason != blank -%}
+          &nbsp;{{ 'customer.order.cancelled_reason' | t: reason: order.cancel_reason_label }}
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+
+  <div class="account-grid">
+    <div>
+      <table class="otable">
+        <thead>
+          <tr>
+            <th>{{ 'customer.order.product' | t }}</th>
+            <th>{{ 'customer.order.price' | t }}</th>
+            <th>{{ 'customer.order.quantity' | t }}</th>
+            <th>{{ 'customer.order.total' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for line_item in order.line_items -%}
+            <tr>
+              <td>
+                <a href="{{ line_item.product.url }}">{{ line_item.title | escape }}</a>
+                {%- if line_item.sku != blank -%}
+                  <br><span class="form-note">{{ 'customer.order.sku' | t }} {{ line_item.sku }}</span>
+                {%- endif -%}
+              </td>
+              <td>{{ line_item.price | money }}</td>
+              <td>{{ line_item.quantity }}</td>
+              <td>{{ line_item.final_line_price | money }}</td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">{{ 'customer.order.subtotal' | t }}</td>
+            <td>{{ order.line_items_subtotal_price | money }}</td>
+          </tr>
+          {%- for discount in order.cart_level_discount_applications -%}
+            <tr>
+              <td colspan="3">{{ discount.title | escape }}</td>
+              <td>&minus;{{ discount.total_allocated_amount | money }}</td>
+            </tr>
+          {%- endfor -%}
+          {%- for shipping_method in order.shipping_methods -%}
+            <tr>
+              <td colspan="3">{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</td>
+              <td>{{ shipping_method.price | money }}</td>
+            </tr>
+          {%- endfor -%}
+          {%- for tax_line in order.tax_lines -%}
+            <tr>
+              <td colspan="3">{{ 'customer.order.tax' | t }} ({{ tax_line.title }})</td>
+              <td>{{ tax_line.price | money }}</td>
+            </tr>
+          {%- endfor -%}
+          <tr>
+            <td colspan="3"><b>{{ 'customer.order.total' | t }}</b></td>
+            <td><b>{{ order.total_net_amount | money_with_currency }}</b></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="account-nav">
+      <div>
+        <h2 class="lab">{{ 'customer.order.payment_status' | t }}</h2>
+        <p class="form-note">{{ order.financial_status_label }}</p>
+      </div>
+      <div>
+        <h2 class="lab">{{ 'customer.order.fulfillment_status' | t }}</h2>
+        <p class="form-note">{{ order.fulfillment_status_label }}</p>
+      </div>
+      <div>
+        <h2 class="lab">{{ 'customer.order.shipping_address' | t }}</h2>
+        <div class="form-note">{{ order.shipping_address | format_address }}</div>
+      </div>
+      <div>
+        <h2 class="lab">{{ 'customer.order.billing_address' | t }}</h2>
+        <div class="form-note">{{ order.billing_address | format_address }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Order",
+  "tag": "section",
+  "class": "section-order",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["customers/order"]
+  }
+}
+{% endschema %}

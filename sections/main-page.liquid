@@ -1,0 +1,20 @@
+<div class="wrap">
+  <div class="page-head">
+    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+    <h1 class="dsp">{{ page.title | escape }}</h1>
+  </div>
+
+  <div class="page-body rte">{{ page.content }}</div>
+</div>
+
+{% schema %}
+{
+  "name": "Page",
+  "tag": "section",
+  "class": "section-page",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

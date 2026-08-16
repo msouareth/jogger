@@ -1,0 +1,105 @@
+<div class="wrap">
+  <div class="page-head">
+    <p class="crumb">
+      <a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a>
+      &nbsp;/&nbsp;<a href="{{ blog.url }}">{{ blog.title | escape }}</a>
+    </p>
+    <p class="article-meta">
+      {{ article.published_at | date: format: 'date' }}
+      {%- if section.settings.show_author and article.author != blank -%}
+        &nbsp;&middot;&nbsp;{{ 'blogs.article.by' | t: author: article.author }}
+      {%- endif -%}
+    </p>
+    <h1 class="dsp">{{ article.title | escape }}</h1>
+  </div>
+
+  {%- if article.image and section.settings.show_image -%}
+    <div class="article-hero rv-img">
+      {% render 'media', image: article.image, ratio: '16 / 9', sizes: '100vw', loading: 'eager' %}
+    </div>
+  {%- endif -%}
+
+  <div class="page-body rte">{{ article.content }}</div>
+
+  {%- if blog.comments_enabled? -%}
+    <div class="page-body" style="padding-bottom: clamp(56px, 8vw, 110px);">
+      {%- if article.comments_count > 0 -%}
+        <h2 class="h2" style="margin-bottom: 24px;">
+          {{ 'blogs.article.comments' | t: count: article.comments_count }}
+        </h2>
+
+        {%- for comment in article.comments -%}
+          <div style="padding: 20px 0; border-bottom: 1px solid var(--color-divider);">
+            <p class="article-meta">
+              {{ comment.author | escape }} &middot; {{ comment.created_at | date: format: 'date' }}
+            </p>
+            <div class="rte">{{ comment.content }}</div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+
+      <div class="account-form" style="margin-top: 40px;">
+        <h2 class="h2">{{ 'blogs.article.comment_form' | t }}</h2>
+
+        {%- form 'new_comment', article -%}
+          {%- if form.posted_successfully? -%}
+            <p class="form-success">{{ 'blogs.article.success' | t }}</p>
+          {%- elsif form.errors -%}
+            <div class="form-error">
+              <ul>
+                {%- for field in form.errors -%}
+                  <li>{{ form.errors.messages[field] }}</li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
+          <div class="field">
+            <label for="CommentAuthor">{{ 'blogs.article.name' | t }}</label>
+            <input type="text" id="CommentAuthor" name="comment[author]" value="{{ form.author }}" required>
+          </div>
+
+          <div class="field">
+            <label for="CommentEmail">{{ 'blogs.article.email' | t }}</label>
+            <input type="email" id="CommentEmail" name="comment[email]" value="{{ form.email }}" required>
+          </div>
+
+          <div class="field">
+            <label for="CommentBody">{{ 'blogs.article.message' | t }}</label>
+            <textarea id="CommentBody" name="comment[body]" required>{{ form.body }}</textarea>
+          </div>
+
+          {%- if blog.moderated? -%}
+            <p class="form-note">{{ 'blogs.article.moderated' | t }}</p>
+          {%- endif -%}
+
+          <div>
+            <button type="submit" class="b b-solid">
+              {{ 'blogs.article.post' | t }}
+              <span class="ar">&rarr;</span>
+            </button>
+          </div>
+        {%- endform -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <p style="padding-bottom: clamp(56px, 8vw, 100px);">
+    <a class="b b-ghost" href="{{ blog.url }}">{{ 'blogs.article.back' | t }}</a>
+  </p>
+</div>
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "class": "section-article",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show featured image", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": true }
+  ],
+  "enabled_on": {
+    "templates": ["article"]
+  }
+}
+{% endschema %}

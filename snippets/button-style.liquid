@@ -1,0 +1,47 @@
+{%- comment -%}
+  Per-button colour overrides — the counterpart to text-style.liquid.
+
+  Emits bare CSS declarations, no style="" wrapper, so a call site that
+  already has inline custom properties can concatenate them:
+
+    {%- capture button_colors -%}
+      {% render 'button-style', s: section.settings, key: 'button' %}
+    {%- endcapture -%}
+    <a class="b b-solid" style="{{ button_colors }}">
+
+  Every button variant in mundo.css reads --btn-bg / --btn-fg / --btn-hover
+  and falls back to its own scheme colour, so setting one of these on a
+  single button restyles only that button. Leaving a colour empty means
+  that aspect keeps following the colour scheme.
+
+  Accepts:
+  - s   {Object} settings object — section.settings or block.settings
+  - key {String} setting prefix. 'button' reads button_bg, button_fg
+                 and button_hover.
+{%- endcomment -%}
+
+{%- liquid
+  assign bg_key = key | append: '_bg'
+  assign fg_key = key | append: '_fg'
+  assign hover_key = key | append: '_hover'
+
+  assign bg = s[bg_key]
+  assign fg = s[fg_key]
+  assign hover = s[hover_key]
+
+  assign out = ''
+
+  if bg != blank
+    assign out = out | append: '--btn-bg:' | append: bg | append: ';'
+  endif
+
+  if fg != blank
+    assign out = out | append: '--btn-fg:' | append: fg | append: ';'
+  endif
+
+  if hover != blank
+    assign out = out | append: '--btn-hover:' | append: hover | append: ';'
+  endif
+
+  echo out
+-%}

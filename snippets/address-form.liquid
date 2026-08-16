@@ -1,0 +1,141 @@
+{%- comment -%}
+  Accepts:
+  - address {Object}  customer.new_address or an existing address.
+  - form_id {String}  Prefix for input ids so several forms can coexist.
+  - is_new  {Boolean} Whether this creates a new address.
+{%- endcomment -%}
+
+{%- liquid
+  assign id_prefix = form_id
+  unless is_new
+    assign id_prefix = form_id | append: '-' | append: address.id
+  endunless
+-%}
+
+{%- form 'customer_address', address -%}
+  <div class="account-form" style="margin-top: 18px;">
+    <div class="field">
+      <label for="{{ id_prefix }}-FirstName">{{ 'customer.addresses.first_name' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-FirstName"
+        name="address[first_name]"
+        value="{{ address.first_name }}"
+        autocomplete="given-name"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-LastName">{{ 'customer.addresses.last_name' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-LastName"
+        name="address[last_name]"
+        value="{{ address.last_name }}"
+        autocomplete="family-name"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Company">{{ 'customer.addresses.company' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-Company"
+        name="address[company]"
+        value="{{ address.company }}"
+        autocomplete="organization"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Address1">{{ 'customer.addresses.address1' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-Address1"
+        name="address[address1]"
+        value="{{ address.address1 }}"
+        autocomplete="address-line1"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Address2">{{ 'customer.addresses.address2' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-Address2"
+        name="address[address2]"
+        value="{{ address.address2 }}"
+        autocomplete="address-line2"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-City">{{ 'customer.addresses.city' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-City"
+        name="address[city]"
+        value="{{ address.city }}"
+        autocomplete="address-level2"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Country">{{ 'customer.addresses.country' | t }}</label>
+      <select
+        id="{{ id_prefix }}-Country"
+        name="address[country]"
+        data-address-country
+        data-default="{{ address.country }}"
+        autocomplete="country"
+      >
+        {{ all_country_option_tags }}
+      </select>
+    </div>
+
+    <div class="field" data-address-province-wrapper>
+      <label for="{{ id_prefix }}-Province">{{ 'customer.addresses.province' | t }}</label>
+      <select
+        id="{{ id_prefix }}-Province"
+        name="address[province]"
+        data-address-province
+        data-default="{{ address.province }}"
+        autocomplete="address-level1"
+      ></select>
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Zip">{{ 'customer.addresses.zip' | t }}</label>
+      <input
+        type="text"
+        id="{{ id_prefix }}-Zip"
+        name="address[zip]"
+        value="{{ address.zip }}"
+        autocomplete="postal-code"
+      >
+    </div>
+
+    <div class="field">
+      <label for="{{ id_prefix }}-Phone">{{ 'customer.addresses.phone' | t }}</label>
+      <input
+        type="tel"
+        id="{{ id_prefix }}-Phone"
+        name="address[phone]"
+        value="{{ address.phone }}"
+        autocomplete="tel"
+      >
+    </div>
+
+    <label style="display: flex; gap: 10px; align-items: center; font-size: 13.5px;">
+      <input type="checkbox" name="address[default]" value="1" {% if address.default? %}checked{% endif %}>
+      {{ 'customer.addresses.set_default' | t }}
+    </label>
+
+    <div>
+      <button type="submit" class="b b-solid">
+        {{ 'customer.addresses.save' | t }}
+        <span class="ar">&rarr;</span>
+      </button>
+    </div>
+  </div>
+{%- endform -%}

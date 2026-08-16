@@ -1,0 +1,229 @@
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  <div class="wrap">
+    <div class="vals" style="--cols: {{ section.blocks.size | at_most: 4 | at_least: 1 }};">
+      {%- capture number_style %}{% render 'text-style', s: section.settings, key: 'number' %}{% endcapture -%}
+
+      {%- for block in section.blocks -%}
+        {%- capture heading_style %}{% render 'text-style', s: block.settings, key: 'heading' %}{% endcapture -%}
+        {%- capture body_style %}{% render 'text-style', s: block.settings, key: 'body' %}{% endcapture -%}
+        <div class="rv" style="--i: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+          {%- if section.settings.show_numbers -%}
+            <span class="n" style="{{ number_style }}">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+          {%- endif -%}
+          {%- if block.settings.heading != blank -%}
+            <h4 style="{{ heading_style }}">{{ block.settings.heading | escape }}</h4>
+          {%- endif -%}
+          {%- if block.settings.body != blank -%}
+            <p style="{{ body_style }}">{{ block.settings.body | escape }}</p>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Values",
+  "tag": "section",
+  "class": "section-values",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_numbers",
+      "label": "Show numbers",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Number type"
+    },
+    {
+      "type": "select",
+      "id": "number_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "number_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Value",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Named materials"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Text",
+          "default": "Mill, weight and composition on every page. No “premium fabric.”"
+        },
+        {
+          "type": "header",
+          "content": "Heading type"
+        },
+        {
+          "type": "select",
+          "id": "heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "heading",
+              "label": "Heading font"
+            },
+            {
+              "value": "body",
+              "label": "Body font"
+            },
+            {
+              "value": "accent",
+              "label": "Accent font"
+            }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "range",
+          "id": "heading_size",
+          "label": "Size",
+          "min": 50,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Colour",
+          "info": "Leave empty to follow the colour scheme."
+        },
+        {
+          "type": "header",
+          "content": "Text type"
+        },
+        {
+          "type": "select",
+          "id": "body_font",
+          "label": "Font",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "heading",
+              "label": "Heading font"
+            },
+            {
+              "value": "body",
+              "label": "Body font"
+            },
+            {
+              "value": "accent",
+              "label": "Accent font"
+            }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "range",
+          "id": "body_size",
+          "label": "Size",
+          "min": 50,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "color",
+          "id": "body_color",
+          "label": "Colour",
+          "info": "Leave empty to follow the colour scheme."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Values",
+      "blocks": [
+        {
+          "type": "value"
+        },
+        {
+          "type": "value",
+          "settings": {
+            "heading": "Repairs, free",
+            "body": "Send it back for the life of the garment. We re-tape seams and replace buttons."
+          }
+        },
+        {
+          "type": "value",
+          "settings": {
+            "heading": "Two drops a year",
+            "body": "Spring and autumn. Nothing in between, nothing discounted."
+          }
+        },
+        {
+          "type": "value",
+          "settings": {
+            "heading": "Returns in 30 days",
+            "body": "Unworn, tags on, prepaid label in the box. No form to fill in."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

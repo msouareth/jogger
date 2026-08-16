@@ -1,0 +1,158 @@
+{%- comment -%}
+  The product card used by every grid in the theme.
+
+  Badges are automatic — sold out, then reduced, then a "new" tag — and a
+  merchant can force any label by tagging a product `badge:Icon`.
+
+  Accepts:
+  - product {Object}
+  - index   {Number}  Position in the grid; staggers the reveal.
+  - sizes   {String}  The image sizes attribute for this grid's column width.
+  - ratio   {String}  Card image ratio. Default 3 / 4.
+  - loading {String}  'eager' for above-the-fold grids.
+  - style   {String}  'tile' centres the text, pads the image inside its
+                      surface tile, shows a plain "+" quick add and renders
+                      colour options as photos. Anything else keeps the
+                      flush-left original.
+{%- endcomment -%}
+
+{%- liquid
+  assign i = index | default: 0
+  assign card_sizes = sizes | default: '(min-width: 1100px) 25vw, 50vw'
+  assign card_ratio = ratio | default: '3 / 4'
+
+  assign is_tile = false
+  if style == 'tile'
+    assign is_tile = true
+    assign card_ratio = ratio | default: '1 / 1'
+  endif
+
+  assign badge_text = ''
+  assign badge_class = ''
+
+  for tag in product.tags
+    if tag contains 'badge:'
+      assign badge_text = tag | remove_first: 'badge:' | strip
+      break
+    endif
+  endfor
+
+  if badge_text == blank
+    for tag in product.tags
+      assign lower_tag = tag | downcase
+      if lower_tag == 'new'
+        assign badge_text = 'products.product.new' | t
+        assign badge_class = ' sage'
+        break
+      endif
+    endfor
+  endif
+
+  unless product.available
+    assign badge_text = 'products.product.sold_out' | t
+    assign badge_class = ' sold'
+  else
+    if badge_text == blank and product.compare_at_price > product.price
+      assign badge_text = 'products.product.on_sale' | t
+      assign badge_class = ''
+    endif
+  endunless
+
+  assign second_image = product.images[1]
+
+  assign subtitle = ''
+  case settings.card_subtitle
+    when 'type'
+      assign subtitle = product.type
+    when 'vendor'
+      assign subtitle = product.vendor
+  endcase
+-%}
+
+<article
+  class="pcard rv{% if is_tile %} center{% endif %}"
+  style="--i: {{ i | modulo: 4 }}; --card-ratio: {{ card_ratio }};"
+>
+  <div class="pframe">
+    <a
+      class="pshot{% if is_tile %} pshot--pad{% endif %}"
+      href="{{ product.url }}"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {% render 'media',
+        image: product.featured_image,
+        class: 'media--primary',
+        sizes: card_sizes,
+        loading: loading,
+        placeholder: 'product-1'
+      %}
+      {%- if settings.card_second_image and second_image != blank -%}
+        {% render 'media', image: second_image, class: 'media--alt', sizes: card_sizes, placeholder: 'product-2' %}
+      {%- endif -%}
+    </a>
+
+    {%- if badge_text != blank -%}
+      <span class="tag{{ badge_class }}">{{ badge_text }}</span>
+    {%- endif -%}
+
+    {%- if settings.card_wishlist -%}
+      <button
+        type="button"
+        class="wish"
+        data-wish="{{ product.handle }}"
+        aria-label="{{ 'products.product.save' | t: title: product.title }}"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 20.5S3.5 14.9 3.5 9.3A4.8 4.8 0 0 1 12 6.6a4.8 4.8 0 0 1 8.5 2.7c0 5.6-8.5 11.2-8.5 11.2Z"/>
+        </svg>
+      </button>
+    {%- endif -%}
+
+    {%- if settings.card_quick_add and product.available -%}
+      {%- liquid
+        assign qadd_class = 'qadd'
+        if is_tile
+          assign qadd_class = 'qadd qadd--plus'
+        endif
+      -%}
+      {%- if product.has_only_default_variant or product.variants.size == 1 -%}
+        <button
+          type="button"
+          class="{{ qadd_class }}"
+          data-quick-add="{{ product.selected_or_first_available_variant.id }}"
+          {% if is_tile %}aria-label="{{ 'products.product.quick_add' | t }}"{% endif %}
+        >
+          {%- unless is_tile -%}{{ 'products.product.quick_add' | t }}{%- endunless -%}
+          <span aria-hidden="true">+</span>
+        </button>
+      {%- else -%}
+        {%- comment -%}
+          Products with real options link through rather than adding a
+          size the visitor never chose.
+        {%- endcomment -%}
+        <a
+          class="{{ qadd_class }}"
+          href="{{ product.url }}"
+          {% if is_tile %}aria-label="{{ 'products.product.quick_add' | t }}"{% endif %}
+        >
+          {%- unless is_tile -%}{{ 'products.product.quick_add' | t }}{%- endunless -%}
+          <span aria-hidden="true">+</span>
+        </a>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+
+  <a class="pmeta" href="{{ product.url }}">
+    <h3>{{ product.title | escape }}</h3>
+    <span class="row">
+      {%- unless is_tile -%}
+        <span class="cat">{{ subtitle | escape }}</span>
+      {%- endunless -%}
+      <span class="pr">{% render 'price', product: product %}</span>
+    </span>
+    {%- if settings.card_swatches -%}
+      {% render 'swatch-dots', product: product, style: style %}
+    {%- endif -%}
+  </a>
+</article>

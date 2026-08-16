@@ -1,0 +1,72 @@
+{%- comment -%}
+  The row of colour marks under a product card.
+
+  In the default style these are small dots taking the swatch a merchant set in
+  the admin, falling back to the value's own name as a CSS colour so plain "Oat"
+  or "Sage" still paints something sensible.
+
+  In the 'tile' style they become photo chips: for each colour we find the first
+  variant carrying it that has its own image, so the shopper sees the garment in
+  that colour rather than a flat square.
+
+  Accepts:
+  - product {Object}
+  - limit   {Number}  Marks shown before a "+n" counter. Default 5.
+  - style   {String}  'tile' for photo chips.
+{%- endcomment -%}
+
+{%- liquid
+  assign max = limit | default: 5
+  assign colour_option = false
+
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'colour' or option_name contains 'color'
+      assign colour_option = option
+      break
+    endif
+  endfor
+
+  assign as_photo = false
+  if style == 'tile'
+    assign as_photo = true
+    assign max = limit | default: 4
+  endif
+-%}
+
+{%- if colour_option -%}
+  <span class="dots{% if as_photo %} dots--image{% endif %}">
+    {%- for value in colour_option.values limit: max -%}
+      {%- liquid
+        assign value_name = value.name | default: value
+        assign swatch = value.swatch
+
+        assign photo = blank
+        if as_photo
+          for variant in product.variants
+            assign candidate = variant.options[colour_option.position0]
+            if candidate == value_name and variant.featured_media
+              assign photo = variant.featured_media.preview_image
+              break
+            endif
+          endfor
+        endif
+      -%}
+      {%- if photo != blank -%}
+        <i style="background-image: url({{ photo | image_url: width: 120 }});" title="{{ value_name | escape }}"></i>
+      {%- elsif swatch.image -%}
+        <i style="background-image: url({{ swatch.image | image_url: width: 40 }});" title="{{ value_name | escape }}"></i>
+      {%- else -%}
+        {%- capture fallback_color -%}{%- render 'swatch-color', name: value_name -%}{%- endcapture -%}
+        {%- assign dot = swatch.color | default: fallback_color -%}
+        <i
+          {% if dot != blank %}style="background-color: {{ dot | escape }};"{% endif %}
+          title="{{ value_name | escape }}"
+        ></i>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if colour_option.values.size > max -%}
+      <span class="more">+{{ colour_option.values.size | minus: max }}</span>
+    {%- endif -%}
+  </span>
+{%- endif -%}

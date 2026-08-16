@@ -1,0 +1,72 @@
+<div class="wrap">
+  <div class="page-head">
+    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+    <h1 class="dsp">{{ page.title | escape }}</h1>
+  </div>
+
+  {%- if page.content != blank -%}
+    <div class="page-body rte" style="padding-bottom: 32px;">{{ page.content }}</div>
+  {%- endif -%}
+
+  <div class="account-form" style="padding-bottom: clamp(56px, 8vw, 110px);">
+    {%- form 'contact' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="form-success">{{ 'templates.contact.success' | t }}</p>
+      {%- elsif form.errors -%}
+        <div class="form-error">
+          <ul>
+            {%- for field in form.errors -%}
+              <li>{{ form.errors.messages[field] }}</li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      <div class="field">
+        <label for="ContactName">{{ 'templates.contact.name' | t }}</label>
+        <input type="text" id="ContactName" name="contact[name]" value="{{ form.name }}" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="ContactEmail">{{ 'templates.contact.email' | t }}</label>
+        <input
+          type="email"
+          id="ContactEmail"
+          name="contact[email]"
+          value="{{ form.email }}"
+          autocomplete="email"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="ContactPhone">{{ 'templates.contact.phone' | t }}</label>
+        <input type="tel" id="ContactPhone" name="contact[phone]" value="{{ form.phone }}" autocomplete="tel">
+      </div>
+
+      <div class="field">
+        <label for="ContactMessage">{{ 'templates.contact.message' | t }}</label>
+        <textarea id="ContactMessage" name="contact[body]" required>{{ form.body }}</textarea>
+      </div>
+
+      <div>
+        <button type="submit" class="b b-solid">
+          {{ 'templates.contact.send' | t }}
+          <span class="ar">&rarr;</span>
+        </button>
+      </div>
+    {%- endform -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Contact form",
+  "tag": "section",
+  "class": "section-contact",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

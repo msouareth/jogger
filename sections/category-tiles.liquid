@@ -1,0 +1,379 @@
+{%- comment -%}
+  A tile with neither a collection nor a link is not a category — it is an
+  empty slot left over from the preset. They are counted up front because two
+  things depend on the total: the grid is built for the tiles that actually
+  render, and a section with none left renders nothing at all rather than
+  stranding its heading over empty space. The stylesheet hides a section that
+  emits nothing, so this leaves no gap in the page.
+
+  The editor is the exception: there the section always draws, otherwise a
+  merchant could not select it to fill it in.
+{%- endcomment -%}
+{%- liquid
+  assign shown_tiles = 0
+  for block in section.blocks
+    if block.settings.collection != blank or block.settings.link != blank
+      assign shown_tiles = shown_tiles | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if shown_tiles > 0 or request.design_mode -%}
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  <div class="wrap">
+    {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+    {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+
+    {%- if section.settings.label != blank or section.settings.heading != blank -%}
+      <div class="shead rv">
+        <div>
+          {%- if section.settings.label != blank -%}
+            <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="h2" style="{{ heading_style }}">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- liquid
+      comment
+        Column count is a setting, never the number of tiles. Deriving it from
+        the count meant losing a category made the survivors grow — a tile is
+        4/5, so a third fewer columns is a third wider and a third taller. Two
+        categories now sit in two of the three columns and leave the third
+        empty, at the size they have always been.
+      endcomment
+      assign columns = section.settings.columns
+
+      comment
+        Past a full row the grid would start stacking rows down the page, so it
+        turns into the drag rail the lookbook already uses instead.
+      endcomment
+      assign use_rail = false
+      if section.settings.layout == 'carousel'
+        assign use_rail = true
+      elsif section.settings.layout == 'auto' and shown_tiles > columns
+        assign use_rail = true
+      endif
+    -%}
+
+    {%- comment -%}
+      Captured once and placed into whichever container wins, rather than
+      written out twice and left to drift apart.
+
+      Empty slots are skipped here. They used to fall through to the whole
+      catalogue, which made every unconfigured tile a working link to the same
+      place — three "categories" all opening the same items. Written as a plain
+      condition rather than a `continue` inside the liquid tag, so there is no
+      question of the jump carrying across the tag boundary into the loop.
+    {%- endcomment -%}
+    {%- capture tiles_html -%}
+      {%- assign tile_i = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.settings.collection != blank or block.settings.link != blank -%}
+          {%- liquid
+            assign tile_collection = block.settings.collection
+            assign tile_image = block.settings.image | default: tile_collection.image | default: tile_collection.featured_image
+            assign tile_title = block.settings.heading | default: tile_collection.title
+            assign tile_url = block.settings.link | default: tile_collection.url
+            assign tile_i = tile_i | plus: 1
+          -%}
+          <a
+            class="tile rv"
+            style="--i: {{ tile_i | minus: 1 }};"
+            href="{{ tile_url }}"
+            {{ block.shopify_attributes }}
+          >
+            {% render 'media',
+              image: tile_image,
+              sizes: '(min-width: 780px) 33vw, 100vw',
+              placeholder: 'collection-1'
+            %}
+            <span class="shade"></span>
+            <span class="cap">
+              {%- capture caption_style %}{% render 'text-style', s: block.settings, key: 'caption' %}{% endcapture -%}
+              <h3 style="{{ caption_style }}">{{ tile_title | escape }}</h3>
+              {%- if section.settings.show_counts and tile_collection != blank -%}
+                <span>{{ tile_collection.products_count }}</span>
+              {%- endif -%}
+            </span>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- if shown_tiles > 0 -%}
+      {%- if use_rail -%}
+        <div class="rail-wrap">
+          <div class="rail rail--tiles" style="--cols: {{ columns }};">{{ tiles_html }}</div>
+
+          <button type="button" class="rail-nav prev" data-rail-prev aria-label="{{ 'accessibility.previous' | t }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button type="button" class="rail-nav next" data-rail-next aria-label="{{ 'accessibility.next' | t }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      {%- else -%}
+        <div class="tiles" style="--cols: {{ columns }};">{{ tiles_html }}</div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      Only in the editor, and now doing real work: a tile with no collection
+      renders nothing at all on the storefront, so without this the merchant
+      would see a block in the sidebar with no matching tile on the page and
+      no explanation.
+    {%- endcomment -%}
+    {%- if request.design_mode -%}
+      {%- assign unset_tiles = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.settings.collection == blank and block.settings.link == blank -%}
+          {%- assign unset_tiles = unset_tiles | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if unset_tiles > 0 -%}
+        <p class="setup-note">{{ 'onboarding.pick_tile_collection' | t }}</p>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Category tiles",
+  "tag": "section",
+  "class": "section-tiles",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "02 — Wardrobe"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "info": "Sets the size of a tile. Fewer categories than columns simply leaves the remaining space empty rather than stretching the tiles to fill it.",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "When there are more categories than columns",
+      "options": [
+        { "value": "auto", "label": "Slide them (recommended)" },
+        { "value": "grid", "label": "Wrap onto more rows" },
+        { "value": "carousel", "label": "Always slide" }
+      ],
+      "info": "Sliding keeps the section one row deep however many categories you add. Wrapping stacks them down the page instead.",
+      "default": "auto"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_counts",
+      "label": "Show product counts",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Falls back to the collection's own image."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Caption",
+          "info": "Falls back to the collection's title."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Falls back to the collection."
+        },
+        {
+          "type": "header",
+          "content": "Caption type"
+        },
+        {
+          "type": "select",
+          "id": "caption_font",
+          "label": "Font",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "heading",
+              "label": "Heading font"
+            },
+            {
+              "value": "body",
+              "label": "Body font"
+            },
+            {
+              "value": "accent",
+              "label": "Accent font"
+            }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "range",
+          "id": "caption_size",
+          "label": "Size",
+          "min": 50,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "color",
+          "id": "caption_color",
+          "label": "Colour",
+          "info": "Leave empty to follow the colour scheme."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category tiles",
+      "blocks": [
+        {
+          "type": "tile"
+        },
+        {
+          "type": "tile"
+        },
+        {
+          "type": "tile"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

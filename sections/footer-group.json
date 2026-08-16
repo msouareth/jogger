@@ -1,0 +1,54 @@
+{
+  "name": "Footer",
+  "type": "footer",
+  "sections": {
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "label": "Two drops a year",
+        "heading": "Know when the\ncollection lands.",
+        "fine_print": "One note per season. Nothing else, ever."
+      }
+    },
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "brand": {
+          "type": "brand",
+          "settings": {
+            "logo_width": 130,
+            "about": "A twenty-four piece wardrobe, cut in Porto from mills we name."
+          }
+        },
+        "shop": {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "menu": "footer"
+          }
+        },
+        "help": {
+          "type": "menu",
+          "settings": {
+            "heading": "Help",
+            "menu": "footer"
+          }
+        },
+        "house": {
+          "type": "menu",
+          "settings": {
+            "heading": "House",
+            "menu": "footer"
+          }
+        }
+      },
+      "block_order": ["brand", "shop", "help", "house"],
+      "settings": {
+        "tagline": "Porto · London",
+        "show_payment_icons": true,
+        "show_locale_selectors": true
+      }
+    }
+  },
+  "order": ["newsletter", "footer"]
+}

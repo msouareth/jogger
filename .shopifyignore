@@ -1,0 +1,21 @@
+# Kept out of the theme archive and out of `shopify theme push`.
+# Shopify only accepts the standard theme directories; anything else here is
+# repo/tooling material for the theme author, not for the merchant's store.
+#
+# Patterns use `dir/*` rather than `dir/` — the CLI matches the former
+# reliably and warns about the latter.
+
+bin/*
+demo/*
+# `dir/*` matches one level, so the generated imagery needs saying separately.
+# It is ~13 MB and belongs in the store's Files, never in the theme archive.
+demo/images/*
+docs/*
+.github/*
+.claude/*
+node_modules/*
+
+README.md
+CHANGELOG.md
+.prettierrc.json
+.theme-check.yml

@@ -1,0 +1,322 @@
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  <div class="wrap">
+    {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+    {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+    {%- capture hint_style %}{% render 'text-style', s: section.settings, key: 'hint' %}{% endcapture -%}
+
+    {%- if section.settings.label != blank or section.settings.heading != blank -%}
+      <div class="shead rv shead--tight">
+        <div>
+          {%- if section.settings.label != blank -%}
+            <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="h2" style="{{ heading_style }}">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+        </div>
+        {%- if section.settings.hint != blank -%}
+          <p class="lab" style="letter-spacing: .1em;{{ hint_style }}">{{ section.settings.hint | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="rail">
+      {%- for block in section.blocks -%}
+        <figure class="look" {{ block.shopify_attributes }}>
+          {%- if block.settings.link != blank -%}
+            <a class="fr" href="{{ block.settings.link }}">
+              {% render 'media',
+                image: block.settings.image,
+                sizes: '(min-width: 900px) 27vw, 70vw',
+                placeholder: 'lifestyle-1'
+              %}
+            </a>
+          {%- else -%}
+            <span class="fr">
+              {% render 'media',
+                image: block.settings.image,
+                sizes: '(min-width: 900px) 27vw, 70vw',
+                placeholder: 'lifestyle-1'
+              %}
+            </span>
+          {%- endif -%}
+
+          {%- if block.settings.caption != blank -%}
+            {%- capture caption_style %}{% render 'text-style', s: block.settings, key: 'caption' %}{% endcapture -%}
+            <figcaption style="{{ caption_style }}">{{ block.settings.caption | escape }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Lookbook rail",
+  "tag": "section",
+  "class": "section-lookbook",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "04 — Lookbook"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "A/W 26 in the round"
+    },
+    {
+      "type": "text",
+      "id": "hint",
+      "label": "Hint",
+      "info": "Sits at the right of the heading row.",
+      "default": "Drag to explore →"
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Hint type"
+    },
+    {
+      "type": "select",
+      "id": "hint_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "hint_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "hint_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "look",
+      "name": "Look",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Look 01 — The long coat"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Caption type"
+        },
+        {
+          "type": "select",
+          "id": "caption_font",
+          "label": "Font",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "heading",
+              "label": "Heading font"
+            },
+            {
+              "value": "body",
+              "label": "Body font"
+            },
+            {
+              "value": "accent",
+              "label": "Accent font"
+            }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "range",
+          "id": "caption_size",
+          "label": "Size",
+          "min": 50,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "color",
+          "id": "caption_color",
+          "label": "Colour",
+          "info": "Leave empty to follow the colour scheme."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook rail",
+      "blocks": [
+        {
+          "type": "look"
+        },
+        {
+          "type": "look",
+          "settings": {
+            "caption": "Look 02 — Gauze & wool"
+          }
+        },
+        {
+          "type": "look",
+          "settings": {
+            "caption": "Look 03 — Knit dressing"
+          }
+        },
+        {
+          "type": "look",
+          "settings": {
+            "caption": "Look 04 — Off duty"
+          }
+        },
+        {
+          "type": "look",
+          "settings": {
+            "caption": "Look 05 — Evening"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,247 @@
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  <div class="wrap">
+    <section class="news rv">
+      {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+      {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+      {%- capture fine_style %}{% render 'text-style', s: section.settings, key: 'fine' %}{% endcapture -%}
+      {%- capture join_colors %}{% render 'button-style', s: section.settings, key: 'join' %}{% endcapture -%}
+
+      <div>
+        {%- if section.settings.label != blank -%}
+          <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="h2" style="margin-top: 12px;{{ heading_style }}">
+            {{- section.settings.heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+      </div>
+
+      <div>
+        {%- form 'customer', class: 'newsletter-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label class="visually-hidden" for="NewsletterEmail">{{ 'newsletter.email' | t }}</label>
+
+          <div class="frow">
+            <input
+              type="email"
+              id="NewsletterEmail"
+              name="contact[email]"
+              value="{{ form.email }}"
+              placeholder="{{ 'newsletter.email' | t }}"
+              autocomplete="email"
+              required
+            >
+            <button type="submit" class="b b-ghost" style="{{ join_colors }}">
+              {{ 'newsletter.submit' | t }}
+              <span class="ar">&rarr;</span>
+            </button>
+          </div>
+
+          {%- comment -%} form is only in scope inside the form block {%- endcomment -%}
+          {%- if form.posted_successfully? -%}
+            <p class="form-success">{{ 'newsletter.success' | t }}</p>
+          {%- elsif form.errors -%}
+            <p class="form-error">{{ form.errors.messages.email }}</p>
+          {%- endif -%}
+        {%- endform -%}
+
+        {%- if section.settings.fine_print != blank -%}
+          <p class="fine" style="{{ fine_style }}">{{ section.settings.fine_print | escape }}</p>
+        {%- endif -%}
+      </div>
+    </section>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "section",
+  "class": "section-newsletter",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Two drops a year"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Line breaks are kept.",
+      "default": "Know when the\ncollection lands."
+    },
+    {
+      "type": "text",
+      "id": "fine_print",
+      "label": "Fine print",
+      "default": "One note per season. Nothing else, ever."
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Fine print type"
+    },
+    {
+      "type": "select",
+      "id": "fine_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "fine_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "fine_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Join button colours"
+    },
+    {
+      "type": "color",
+      "id": "join_bg",
+      "label": "Fill",
+      "info": "Leave empty to follow the colour scheme. On outline and underline buttons this is the line colour."
+    },
+    {
+      "type": "color",
+      "id": "join_fg",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "join_hover",
+      "label": "On hover"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter"
+    }
+  ]
+}
+{% endschema %}

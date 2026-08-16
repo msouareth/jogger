@@ -1,0 +1,56 @@
+{%- comment -%}
+  Renders a price, showing a struck-through original whenever the item is
+  reduced and a "From" prefix when a product's variants disagree.
+
+  Accepts:
+  - product  {Object}  Optional. Uses the product's selected or first variant.
+  - variant  {Object}  Optional. Takes precedence over product.
+  - show_unit {Boolean} Append the unit price when the variant has one.
+{%- endcomment -%}
+
+{%- liquid
+  if variant
+    assign target = variant
+  else
+    assign target = product.selected_or_first_available_variant
+  endif
+
+  assign price = target.price
+  assign compare = target.compare_at_price
+
+  if variant == blank and product.price_varies
+    assign price = product.price_min
+  endif
+
+  assign on_sale = false
+  if compare > price
+    assign on_sale = true
+  endif
+
+  assign price_money = price | money
+  assign varies = false
+  if variant == blank and product.price_varies
+    assign varies = true
+  endif
+
+  if varies
+    assign price_label = 'products.product.from_price' | t: price: price_money
+  else
+    assign price_label = price_money
+  endif
+-%}
+
+{%- if on_sale -%}
+  <span class="was">{{ compare | money }}</span>
+  <span class="now">{{ price_label }}</span>
+{%- else -%}
+  {{ price_label }}
+{%- endif -%}
+
+{%- if show_unit and target.unit_price_measurement -%}
+  <span class="pdp-unit">
+    {{ target.unit_price | money }}/{% if target.unit_price_measurement.reference_value != 1 %}
+      {{- target.unit_price_measurement.reference_value -}}
+    {% endif %}{{ target.unit_price_measurement.reference_unit }}
+  </span>
+{%- endif -%}

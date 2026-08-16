@@ -1,0 +1,47 @@
+<div class="wrap">
+  <div class="chead">
+    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+    <h1 class="dsp">{{ page_title | escape }}</h1>
+  </div>
+
+  <div class="tiles" style="--cols: {{ section.settings.columns }};">
+    {%- for collection in collections -%}
+      <a class="tile rv" style="--i: {{ forloop.index0 | modulo: 3 }};" href="{{ collection.url }}">
+        {% render 'media',
+          image: collection.image,
+          sizes: '(min-width: 780px) 33vw, 100vw',
+          placeholder: 'collection-1'
+        %}
+        <span class="shade"></span>
+        <span class="cap">
+          <h3>{{ collection.title | escape }}</h3>
+          <span>{{ collection.products_count }}</span>
+        </span>
+      </a>
+    {%- endfor -%}
+  </div>
+
+  <div style="height: clamp(56px, 8vw, 100px);"></div>
+</div>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "tag": "section",
+  "class": "section-collections-list",
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    }
+  ],
+  "enabled_on": {
+    "templates": ["list-collections"]
+  }
+}
+{% endschema %}

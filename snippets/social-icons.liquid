@@ -1,0 +1,48 @@
+{%- liquid
+  assign links = ''
+  if settings.social_instagram_link != blank
+    assign links = links | append: 'instagram,'
+  endif
+  if settings.social_tiktok_link != blank
+    assign links = links | append: 'tiktok,'
+  endif
+  if settings.social_pinterest_link != blank
+    assign links = links | append: 'pinterest,'
+  endif
+  if settings.social_facebook_link != blank
+    assign links = links | append: 'facebook,'
+  endif
+  if settings.social_youtube_link != blank
+    assign links = links | append: 'youtube,'
+  endif
+  assign link_list = links | split: ','
+-%}
+
+{%- if link_list.size > 0 -%}
+  <div class="socials">
+    {%- for network in link_list -%}
+      {%- liquid
+        case network
+          when 'instagram'
+            assign url = settings.social_instagram_link
+            assign label = 'Instagram'
+          when 'tiktok'
+            assign url = settings.social_tiktok_link
+            assign label = 'TikTok'
+          when 'pinterest'
+            assign url = settings.social_pinterest_link
+            assign label = 'Pinterest'
+          when 'facebook'
+            assign url = settings.social_facebook_link
+            assign label = 'Facebook'
+          when 'youtube'
+            assign url = settings.social_youtube_link
+            assign label = 'YouTube'
+        endcase
+      -%}
+      <a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ label }}">
+        {% render 'icon', name: network %}
+      </a>
+    {%- endfor -%}
+  </div>
+{%- endif -%}

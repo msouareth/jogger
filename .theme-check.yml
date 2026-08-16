@@ -1,0 +1,11 @@
+extends: theme-check:recommended
+
+# Mundo ships a single locale pair, so translation matching is trivially
+# satisfied today — leave it on so it starts failing the moment a second
+# locale drifts out of sync.
+MatchingTranslations:
+  enabled: true
+
+TemplateLength:
+  enabled: true
+  max_length: 400

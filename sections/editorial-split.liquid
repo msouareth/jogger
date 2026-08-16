@@ -1,0 +1,340 @@
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  {%- liquid
+    assign parallax = ''
+    if settings.motion_parallax
+      assign parallax = ' plx'
+    endif
+
+    assign flip = ''
+    if section.settings.image_position == 'right'
+      assign flip = ' flip'
+    endif
+  -%}
+
+  <div class="wrap">
+    <div class="split{{ flip }}">
+      <figure class="rv-img">
+        {% render 'media',
+          image: section.settings.image,
+          class: parallax,
+          ratio: '4 / 3',
+          sizes: '(min-width: 880px) 55vw, 100vw',
+          placeholder: 'lifestyle-2',
+          alt: section.settings.image_alt
+        %}
+      </figure>
+
+      {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+      {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+      {%- capture body_style %}{% render 'text-style', s: section.settings, key: 'body' %}{% endcapture -%}
+      {%- capture button_style %}{% render 'text-style', s: section.settings, key: 'button' %}{% endcapture -%}
+      {%- capture button_colors %}{% render 'button-style', s: section.settings, key: 'button' %}{% endcapture -%}
+
+      <div class="copy">
+        {%- if section.settings.label != blank -%}
+          <p class="lab rv" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          {%- comment -%}
+            Escaped before newline_to_br so the merchant's line breaks survive
+            but their text can't inject markup.
+          {%- endcomment -%}
+          <h2 class="h2 rv" style="--i: 1;{{ heading_style }}">
+            {{- section.settings.heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <div class="body rte rv" style="--i: 2;{{ body_style }}">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank -%}
+          <div class="rv" style="--i: 3;">
+            <a
+              class="b b-line"
+              href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+              style="{{ button_style }}{{ button_colors }}"
+            >
+              {{ section.settings.button_label | escape }}
+              <span class="ar">&rarr;</span>
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Editorial split",
+  "tag": "section",
+  "class": "section-editorial",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image description"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "03 — The making"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Line breaks are kept.",
+      "default": "We name the mill,\nthe yarn and the maker."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text",
+      "default": "<p>Every product page lists where the cloth was woven and who sewed it. The gauze shirt is Albini cotton, the knit is two-ply Cariaggi cashmere, and both were finished by the same twelve people in Porto.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Read a product page"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Text type"
+    },
+    {
+      "type": "select",
+      "id": "body_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Button type"
+    },
+    {
+      "type": "select",
+      "id": "button_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Button colours"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Fill",
+      "info": "Leave empty to follow the colour scheme. On outline and underline buttons this is the line colour."
+    },
+    {
+      "type": "color",
+      "id": "button_fg",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "button_hover",
+      "label": "On hover"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial split"
+    }
+  ]
+}
+{% endschema %}

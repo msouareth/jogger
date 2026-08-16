@@ -1,0 +1,4052 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Mundo — warm modern apparel theme
+   Architectural bones: visible grid, flush-left labels, light weights,
+   a warm sand ground and a camel accent. Motion throughout: scroll
+   reveals, a drifting hero, shoppable hotspots and soft crossfades.
+
+   All colour, type and geometry tokens are emitted by layout/theme.liquid
+   from theme settings — this file never hard-codes a brand colour.
+   ═══════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.6;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--color-accent-200);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--edge);
+  z-index: 100;
+  transition: top 0.2s var(--ease);
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.wrap {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-inline: var(--edge);
+}
+
+/* ── colour schemes ───────────────────────────────────────────────
+   Sections wrap their contents in .scheme.color-scheme-N. The scheme
+   class rebases every colour token for that subtree (see
+   snippets/css-variables.liquid), and .scheme is what actually paints
+   the band, so alternating schemes down a page just works. */
+.scheme {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ── media frames ─────────────────────────────────────────────────
+   Every image in the theme sits in a .media frame that reserves its
+   aspect ratio before the image loads, so nothing shifts on paint. */
+.media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.media > img,
+.media > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media--contain > img {
+  object-fit: contain;
+}
+
+.media .placeholder-svg {
+  fill: rgba(var(--color-text-rgb), 0.12);
+  background: var(--color-surface);
+}
+
+/* ── type ── */
+.dsp {
+  font-family: var(--font-heading);
+  font-weight: var(--font-display-weight);
+  font-size: calc(clamp(38px, 5.6vw, 84px) * var(--type-scale) * var(--ts, 1));
+  line-height: 1.02;
+  letter-spacing: var(--heading-tracking);
+  margin: 0;
+}
+
+.dsp em,
+.dsp strong {
+  font-style: normal;
+  font-weight: 500;
+}
+
+.h2 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: calc(clamp(24px, 2.6vw, 38px) * var(--type-scale) * var(--ts, 1));
+  line-height: 1.1;
+  letter-spacing: var(--heading-tracking);
+  margin: 0;
+}
+
+.h3 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: calc(clamp(19px, 1.9vw, 26px) * var(--type-scale) * var(--ts, 1));
+  line-height: 1.2;
+  letter-spacing: var(--heading-tracking);
+  margin: 0;
+}
+
+.lab {
+  font-size: calc(11px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  margin: 0;
+}
+
+.body {
+  font-size: calc(15.5px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.7;
+  color: var(--ink-70);
+  margin: 0;
+  max-width: 52ch;
+}
+
+.rte > * + * {
+  margin-top: 1em;
+}
+
+.rte a {
+  color: var(--color-accent-700);
+  text-underline-offset: 3px;
+}
+
+.rte img {
+  border-radius: var(--r);
+  height: auto;
+}
+
+.rte ul,
+.rte ol {
+  padding-left: 1.2em;
+}
+
+.rte li + li {
+  margin-top: 0.4em;
+}
+
+.rte blockquote {
+  margin: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--color-accent-300);
+  color: var(--ink-70);
+}
+
+.rte table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.rte th,
+.rte td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* ── buttons ── */
+.b {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 13px 26px;
+  font-size: calc(12px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: none;
+  white-space: nowrap;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease),
+    transform 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+
+.b[disabled],
+.b[aria-disabled='true'] {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.b .ar {
+  transition: transform 0.35s var(--slow);
+}
+
+.b:hover:not([disabled]) .ar {
+  transform: translateX(5px);
+}
+
+/* Every variant reads --btn-bg / --btn-fg / --btn-hover first and falls
+   back to its scheme colour. Setting one of those on a single button —
+   which is what snippets/button-style.liquid does — recolours only that
+   button, exactly as --ts and colour do for a single piece of text.
+   Leaving one unset keeps that aspect following the colour scheme. */
+.b-solid {
+  background: var(--btn-bg, var(--color-button));
+  color: var(--btn-fg, var(--color-button-text));
+}
+
+.b-solid:hover:not([disabled]) {
+  background: var(--btn-hover, var(--color-button-hover));
+}
+
+.b-line {
+  border-color: var(--btn-bg, rgba(var(--color-text-rgb), 0.26));
+  color: var(--btn-fg, inherit);
+}
+
+/* An outline button reads as secondary while idle, so it follows the
+   scheme's text colour. On hover it becomes solid, and should match the
+   solid buttons rather than invent a third colour. */
+.b-line:hover:not([disabled]) {
+  border-color: var(--btn-hover, var(--btn-bg, var(--color-button)));
+  background: var(--btn-hover, var(--btn-bg, var(--color-button)));
+  color: var(--btn-fg-hover, var(--color-button-text));
+}
+
+.b-paper {
+  background: var(--btn-bg, var(--color-bg));
+  color: var(--btn-fg, var(--color-text));
+}
+
+.b-paper:hover:not([disabled]) {
+  background: var(--btn-hover, var(--color-accent-100));
+}
+
+/* The underline button has no fill, so --btn-bg drives its rule and
+   --btn-fg its label. */
+.b-ghost {
+  padding: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--btn-bg, var(--color-text));
+  color: var(--btn-fg, inherit);
+}
+
+.b-ghost:hover:not([disabled]) {
+  color: var(--btn-hover, var(--color-accent-700));
+  border-bottom-color: var(--btn-hover, var(--color-accent));
+}
+
+/* ── shared form fields ── */
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label,
+.flabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-divider);
+  padding: 11px 0;
+  font: inherit;
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  color: var(--color-text);
+  border-radius: 0;
+  transition: border-color 0.3s var(--ease);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.field select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 22px;
+  background-image: linear-gradient(45deg, transparent 50%, currentcolor 50%),
+    linear-gradient(135deg, currentcolor 50%, transparent 50%);
+  background-position: calc(100% - 10px) calc(50% + 1px), calc(100% - 5px) calc(50% + 1px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-bottom-color: var(--color-text);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--ink-60);
+}
+
+.form-note {
+  font-size: 13px;
+  color: var(--ink-60);
+  margin: 0;
+}
+
+.form-error {
+  font-size: 13px;
+  color: var(--color-accent-700);
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.form-error ul {
+  margin: 0;
+  padding-left: 1em;
+}
+
+.form-success {
+  font-size: 13.5px;
+  color: var(--color-accent-2-700);
+  margin: 0;
+}
+
+/* ── scroll reveal ── */
+.rv {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.9s var(--slow), transform 0.9s var(--slow);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.rv.in {
+  opacity: 1;
+  transform: none;
+}
+
+.rv-img {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1.1s var(--slow);
+}
+
+.rv-img.in {
+  clip-path: inset(0 0 0 0);
+}
+
+.no-js .rv,
+.no-js .rv-img,
+.motion-off .rv,
+.motion-off .rv-img {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .rv,
+  .rv-img {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  .kb,
+  .tick-run,
+  .spot::before {
+    animation: none !important;
+  }
+
+  /* The drift is stopped above, so its overscan is now just a tighter crop for
+     no gain. Hand the framing back. */
+  .hero-frame .media.kb {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* ── ticker ── */
+.ticker {
+  background: var(--color-text);
+  color: var(--color-bg);
+  overflow: hidden;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 60;
+}
+
+.tick-run {
+  display: flex;
+  gap: 56px;
+  padding-left: 56px;
+  white-space: nowrap;
+  animation: tick var(--tick-speed, 34s) linear infinite;
+}
+
+.ticker:hover .tick-run,
+.band:hover .tick-run {
+  animation-play-state: paused;
+}
+
+.tick-run span,
+.tick-run a {
+  font-size: calc(10.5px * var(--ts, 1));
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  text-decoration: none;
+}
+
+@keyframes tick {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── header ── */
+/* Three columns: left cluster, wordmark, right cluster. Both side columns are
+   1fr, so they resolve to the same width and the wordmark lands on the true
+   centre of the bar rather than on the midpoint of whatever space the menu
+   happens to leave.
+
+   The bar holds its own place in the flow: content begins beneath it, not
+   under it. --hdr-ink is the single source every label and icon in the bar
+   colours from. */
+.hdr {
+  --hdr-ink: var(--color-text);
+
+  /* An icon control is a touch target carrying a smaller mark. Both sizes are
+     tokens because the slack between them is what the bar's edge padding has
+     to correct for — derive it once here and the alignment survives any later
+     change to either number. */
+  --hicon-size: 44px;
+  --hicon-glyph: 21px;
+  --hicon-slack: calc((var(--hicon-size) - var(--hicon-glyph)) / 2);
+
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  /* With the clusters aligned inward (see .hside below) this is literally the
+     air either side of the wordmark, so the merchant sets it directly and it
+     is taken at face value here: the number typed into the theme editor is the
+     number of pixels that appear.
+
+     The 22vw term is a safety rail, not a responsive rule, and the distinction
+     matters. Two gaps plus the wordmark plus the icons have to fit across the
+     bar; past roughly a quarter of the viewport each, the gaps starve the icon
+     column and push it off the side of the page. 22vw sits well clear of any
+     ordinary setting — at 1280px it only engages beyond 281px — so it never
+     quietly overrules the merchant the way a smaller viewport term would. It
+     only catches the extreme end of the range on a smaller screen. */
+  gap: min(var(--hdr-gap, 88px), 22vw);
+  /* Pulled in by the icon slack. Aligning the 44px boxes to --edge would leave
+     the marks sitting inside the edge the page below is aligned to, and the
+     corners would read as loose. This lands the glyph on --edge instead. The
+     floor is only a guard against a very small --edge leaving the controls
+     against the side of the screen; it is deliberately below anything the
+     correction produces at the shipped edge sizes, so it never overrides it. */
+  padding: 14px max(4px, calc(var(--edge) - var(--hicon-slack)));
+  color: var(--hdr-ink);
+  transition: padding 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.hdr::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(var(--color-bg-rgb), 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+
+.hdr[data-stuck]::before {
+  opacity: 1;
+}
+
+.hdr[data-stuck] {
+  padding-block: 9px;
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+
+/* Each side is a flex row holding its own outer edge: the menu on the left,
+   the icons on the right. */
+.hside {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2vw, 30px);
+  min-width: 0;
+}
+
+/* Both clusters sit in toward the wordmark rather than out on the page edges.
+
+   That is what makes the column gap mean anything. Pinned to the edges, the
+   air either side of the wordmark is just whatever the viewport has left over
+   — (viewport - padding - wordmark) / 2 - menu — and the gap cancels out of it
+   entirely, because widening the gap shrinks the 1fr columns by exactly as
+   much. Aligned inward, the gap *is* the distance. */
+.hside--left {
+  justify-content: flex-end;
+}
+
+.hside--right {
+  justify-content: flex-start;
+  /* An icon box carries its slack inside it, so the first mark would otherwise
+     read a slack's width further from the wordmark than the last link does on
+     the other side. This puts the two optically level. */
+  margin-left: calc(-1 * var(--hicon-slack));
+}
+
+/* The wordmark is a stacked block: the mark, and under it an optional tagline.
+   Tracking is a token on each line because the optical centring below has to
+   subtract exactly the value that was added. */
+.logo {
+  --logo-track: 0.03em;
+  --tag-track: 0.24em;
+
+  justify-self: center;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--hdr-ink);
+  font-family: var(--font-heading);
+  white-space: nowrap;
+}
+
+.logo-mark {
+  font-size: calc(22px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: var(--logo-track);
+  line-height: 1.1;
+}
+
+/* One weight across the whole mark. The tail is a continuation of the wordmark
+   rather than a contrast against it. */
+.logo b {
+  font-weight: inherit;
+}
+
+.logo-tag {
+  font-size: calc(9px * var(--ts, 1));
+  font-weight: 400;
+  letter-spacing: var(--tag-track);
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0.62;
+}
+
+/* Letter-spacing leaves a trailing gap after the final letter, so the glyphs
+   sit half a step left of the box they are centred in. Pulling each line's
+   right edge back by its own tracking puts both on the optical centre rather
+   than the mathematical one — and it has to be per line, because the two are
+   tracked very differently and each is centred independently in the column. */
+.logo-mark {
+  margin-right: calc(-1 * var(--logo-track));
+}
+
+.logo-tag {
+  margin-right: calc(-1 * var(--tag-track));
+}
+
+.logo img {
+  height: auto;
+  width: var(--logo-width, 110px);
+}
+
+.hnav {
+  min-width: 0;
+  display: flex;
+  gap: clamp(13px, 1.9vw, 32px);
+}
+
+/* The item, not the list, is the positioned ancestor. Anchoring to the list
+   made every panel open at the menu's own left edge rather than beneath the
+   link that owns it — invisible while the menu was one block on the left, and
+   badly wrong once it is split either side of the wordmark. */
+.hnav li {
+  position: relative;
+}
+
+/* Sentence case, and light. The tracked caps of the wordmark are the only
+   emphasis on the bar; setting the links in caps too would give the eye two
+   competing rows and nothing to land on. */
+.hnav a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 0;
+  position: relative;
+  font-size: calc(14px * var(--ts, 1));
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  color: var(--hdr-ink);
+  white-space: nowrap;
+  transition: color 0.3s var(--ease), opacity 0.3s var(--ease);
+  opacity: 0.9;
+}
+
+.caret {
+  display: inline-flex;
+  width: 12px;
+  height: 12px;
+  margin-top: 1px;
+  transition: transform 0.32s var(--slow);
+}
+
+.caret svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hnav li:hover > a .caret,
+.hnav li:focus-within > a .caret {
+  transform: rotate(180deg);
+}
+
+.hnav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.38s var(--slow);
+}
+
+.hnav a:hover,
+.hnav a[aria-current] {
+  opacity: 1;
+}
+
+/* The page you are on is marked in the accent rather than by a rule under it,
+   which keeps the row even. The link also carries aria-current, so the state
+   reaches anyone not reading the colour. */
+.hnav a[aria-current] {
+  color: var(--color-accent);
+}
+
+.hnav a:hover::after,
+.hnav li:focus-within > a::after {
+  transform: scaleX(1);
+}
+
+.hnav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: clamp(13px, 1.9vw, 32px);
+}
+
+/* dropdown */
+.hnav .sub {
+  position: absolute;
+  top: 100%;
+  left: -18px;
+  min-width: 200px;
+  display: grid;
+  gap: 0;
+  padding: 14px 18px 16px;
+  background: var(--color-bg);
+  border-radius: var(--r);
+  box-shadow: 0 12px 40px rgba(var(--color-text-rgb), 0.14);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.28s var(--ease), transform 0.32s var(--slow), visibility 0.28s;
+}
+
+.hnav li:hover > .sub,
+.hnav li:focus-within > .sub {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* The panel has a ground of its own, so its links take the scheme text colour
+   outright. Inheriting --hdr-ink would print white on sand the moment the bar
+   is floating light over a hero. */
+.hnav .sub a {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 13.5px;
+  font-weight: 400;
+  padding: 7px 0;
+  color: var(--color-text);
+  opacity: 1;
+}
+
+.hnav .sub a::after {
+  display: none;
+}
+
+.hnav .sub a:hover {
+  color: var(--color-accent-700);
+}
+
+.htools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Icon controls. A control in a header is a touch target before it is a
+   picture, so the box is sized to the 44px guideline and the mark sits inside
+   it. Both come from the tokens on .hdr. */
+.hicon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--hicon-size, 44px);
+  height: var(--hicon-size, 44px);
+  flex: none;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--hdr-ink);
+  opacity: 0.9;
+  transition: opacity 0.3s var(--ease);
+}
+
+.hicon svg {
+  width: var(--hicon-glyph, 21px);
+  height: var(--hicon-glyph, 21px);
+  display: block;
+}
+
+.hicon:hover {
+  opacity: 1;
+}
+
+/* The count rides the bag rather than sitting beside it, so the row of icons
+   keeps an even rhythm whether the bag is empty or not. */
+.bag-n {
+  position: absolute;
+  top: 5px;
+  right: 2px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  transform: scale(1);
+  transition: transform 0.4s var(--slow);
+}
+
+.bag-n[data-pop] {
+  transform: scale(1.35);
+}
+
+/* Fully styled here and merely switched on when the menu folds, so the two
+   fold triggers below only have to flip `display` rather than restate all of
+   this twice. */
+.menu-toggle {
+  display: none;
+  place-items: center;
+  width: var(--hicon-size, 44px);
+  height: var(--hicon-size, 44px);
+  flex: none;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--hdr-ink);
+}
+
+.menu-toggle span {
+  display: block;
+  width: var(--hicon-glyph, 21px);
+  height: 1px;
+  background: currentcolor;
+}
+
+.menu-toggle span + span {
+  margin-top: 5px;
+}
+
+/* ── folding the menu into the drawer ──
+   Two separate things trigger the same fold.
+
+   The first is width: below the breakpoint there is no room for a menu at all.
+   That one is a media query so it still works with scripting off.
+
+   The second is fit. The menu is a single block beside a centred wordmark, and
+   the side columns are locked to each other so the wordmark stays centred —
+   which means the menu cannot borrow room from the emptier icon side. A long
+   enough menu runs into the wordmark at any width. There is no breakpoint that
+   answers that, because it depends on how many links a merchant wrote and how
+   long the words are, so mundo.js measures it and sets data-fold.
+
+   The toggle keeps the left column's glyph on the same line as the icons
+   opposite, so the correction that the text needs comes back off. */
+.hdr[data-fold] .hnav {
+  display: none;
+}
+
+.hdr[data-fold] .menu-toggle {
+  display: inline-grid;
+}
+
+.hdr[data-fold] .hside {
+  gap: 0;
+}
+
+/* Folded, the left cluster ends in an icon box rather than in text, so it needs
+   the same slack correction the icons opposite already carry — without it the
+   toggle reads a slack's width further from the wordmark than they do. */
+.hdr[data-fold] .hside--left {
+  margin-right: calc(-1 * var(--hicon-slack));
+}
+
+/* Note what is deliberately NOT here: a rule pinning the clusters back to the
+   page edges when the menu folds. Pinned to the edges, the air either side of
+   the wordmark is whatever the viewport has left over and the gap cancels out
+   of it entirely — so the merchant's setting would silently stop doing
+   anything the moment a menu grew long enough to fold. The toggle and the
+   icons stay gathered around the wordmark instead, and the setting keeps
+   meaning what it says. Phones are the exception, below. */
+
+@media (max-width: 940px) {
+  /* A generous desktop setting is far too much on a phone — at 88px the three
+     icons would be pushed into the wordmark. Below the fold the setting becomes
+     an upper bound over a proportional value, so it still counts, but the bar
+     can give way. */
+  .hdr {
+    gap: clamp(20px, 8vw, var(--hdr-gap, 88px));
+  }
+
+  .hnav {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-grid;
+  }
+
+  .hside {
+    gap: 0;
+  }
+
+  .hside--left {
+    justify-content: flex-start;
+  }
+
+  .hside--right {
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+}
+
+/* mobile nav drawer */
+.nav-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 80;
+  width: min(400px, 88vw);
+  background: var(--color-bg);
+  transform: translateX(-100%);
+  transition: transform 0.55s var(--slow);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.nav-drawer[data-open] {
+  transform: none;
+}
+
+.nav-drawer header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.nav-drawer h2 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.nav-drawer ul {
+  list-style: none;
+  margin: 0;
+  padding: 12px 26px;
+  display: grid;
+}
+
+.nav-drawer > ul > li > a {
+  display: block;
+  padding: 15px 0;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.nav-drawer .sub {
+  padding: 4px 0 12px 14px;
+}
+
+.nav-drawer .sub a {
+  display: block;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--ink-70);
+  text-decoration: none;
+}
+
+/* The tools only move in here where the bar has genuinely run out of room —
+   that is a phone, not a desktop whose menu happened to be long. A folded
+   desktop bar still has ample space for three marks, so on those the icons stay
+   in the corner and this list stays out of the way. */
+/* Both of these are written against the parent as well as the list's own class
+   for weight, not for clarity: `.nav-drawer ul` above is worth a class plus an
+   element and would otherwise win, leaving this list showing on desktop where
+   the icons are already in the bar. */
+.nav-drawer > .nav-drawer-tools {
+  display: none;
+}
+
+@media (max-width: 940px) {
+  .nav-drawer > .nav-drawer-tools {
+    display: grid;
+    padding-top: 4px;
+  }
+
+  /* Set a step down from the navigation proper: these are actions, the links
+     above them are the shop. Same target height, quieter type.
+
+     Carries .nav-drawer as well as the list's own class purely for weight: the
+     menu's `.nav-drawer > ul > li > a` rule above is worth more than a single
+     class and would otherwise claim the anchors here and leave them a
+     different height from the buttons beside them. */
+  .nav-drawer .nav-drawer-tools > li > a,
+  .nav-drawer .nav-drawer-tools > li > button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 15px 0;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--color-divider);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--ink-80);
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .nav-drawer-tools svg {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  /* In the bar the count rides the bag mark; on a row of labels it belongs at
+     the end, where the eye finishes reading. */
+  .nav-drawer-tools .bag-n {
+    position: static;
+    margin-left: auto;
+  }
+
+  /* The tools have taken over these three, so the bar keeps only the toggle and
+     the wordmark. */
+  .htools {
+    display: none;
+  }
+}
+
+/* ── hero ── */
+.hero {
+  position: relative;
+  margin: 0;
+  padding: 0 var(--edge);
+}
+
+.hero-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  height: clamp(460px, var(--hero-height, 78vh), 820px);
+  background: var(--color-surface);
+}
+
+/* Whole-picture mode. The frame takes the image's own proportions, so filling
+   it crops nothing and no letterbox bands appear either — the alternative,
+   object-fit: contain against a fixed height, shows the whole image but pads it
+   with dead ground, which is worse in a hero.
+
+   The height now follows the image's shape, so it is bounded by width rather
+   than by height: a max-height would leave the box shorter than its ratio asks
+   for and the crop would quietly return. Capping the width keeps the whole
+   picture and simply centres a narrower hero, which is what a tall image
+   should do rather than run to three screenfuls. */
+.hero-frame--whole {
+  height: auto;
+  aspect-ratio: var(--hero-ratio, 16 / 9);
+  max-width: calc(88vh * var(--hero-ratio, 1.78));
+  margin-inline: auto;
+}
+
+/* The 12% overscan exists for one reason: to give the ken-burns drift somewhere
+   to travel without exposing an edge. Where the image is not drifting it is
+   pure lost framing — 6% cut off every side to no purpose, which on a wide
+   screen is exactly the margin that decides whether a subject's head survives
+   the crop. So the frame is filled exactly unless the drift is actually on. */
+.hero-frame .media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-frame .media.kb {
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+}
+
+.kb {
+  animation: kb 26s ease-in-out infinite alternate;
+}
+
+@keyframes kb {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: scale(1.07) translate3d(0, -1.5%, 0);
+  }
+}
+
+.hero-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(var(--color-text-rgb), var(--veil, 0.62)) 0%,
+    rgba(var(--color-text-rgb), calc(var(--veil, 0.62) * 0.35)) 40%,
+    transparent 66%
+  );
+}
+
+.hero-card {
+  position: absolute;
+  left: clamp(18px, 3vw, 44px);
+  bottom: clamp(18px, 3vw, 44px);
+  right: clamp(18px, 3vw, 44px);
+  max-width: 520px;
+  color: #fff;
+}
+
+.hero-card .lab {
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 14px;
+}
+
+.hero-card h1,
+.hero-card h2 {
+  color: #fff;
+  font-size: calc(clamp(32px, 4.4vw, 62px) * var(--type-scale) * var(--ts, 1));
+}
+
+.hero-card p:not(.lab) {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.65;
+  max-width: 40ch;
+  margin: 14px 0 24px;
+}
+
+.hero-card .b-paper {
+  color: var(--color-text);
+}
+
+.hero-side {
+  position: absolute;
+  right: clamp(18px, 3vw, 44px);
+  top: clamp(18px, 3vw, 44px);
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: calc(10.5px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(var(--color-bg-rgb), 0.86);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* shoppable hotspots */
+.spot {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  transition: transform 0.35s var(--slow);
+}
+
+.spot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: ping 2.6s var(--ease) infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  70%,
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.spot i {
+  width: 11px;
+  height: 1px;
+  background: var(--color-text);
+  position: relative;
+}
+
+.spot i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-text);
+  transform: rotate(90deg);
+  transition: transform 0.35s var(--slow);
+}
+
+.spot:hover {
+  transform: scale(1.12);
+}
+
+.spot:hover i::after {
+  transform: rotate(0deg);
+}
+
+.spot .tip {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  translate: 0 -50%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: var(--r);
+  padding: 9px 14px;
+  text-align: left;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--slow);
+  box-shadow: 0 6px 24px rgba(var(--color-text-rgb), 0.16);
+}
+
+.spot:hover .tip,
+.spot:focus-visible .tip {
+  opacity: 1;
+  transform: none;
+}
+
+.spot .tip b {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.spot .tip span {
+  font-size: 11.5px;
+  color: var(--ink-60);
+}
+
+@media (max-width: 640px) {
+  .spot .tip {
+    left: auto;
+    right: 40px;
+  }
+}
+
+/* ── section head ── */
+.shead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: clamp(56px, 8vw, 104px) 0 26px;
+}
+
+.shead .lab {
+  margin-bottom: 10px;
+}
+
+.shead--tight {
+  padding-top: 0;
+}
+
+/* ── product grid ──────────────────────────────────────────────────
+   Written mobile-first on purpose. Sections set --cols inline from a
+   theme setting, and an inline custom property outranks any stylesheet
+   rule — including one inside a media query — so the desktop count is
+   only ever read inside the min-width query below. Putting the small
+   screens in max-width queries would let the inline value win and the
+   grid would never collapse. */
+.pgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 1.4vw, 22px);
+}
+
+@media (max-width: 520px) {
+  .pgrid {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 1101px) {
+  .pgrid {
+    grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  }
+
+  .pgrid.c3 {
+    --cols: 3;
+  }
+}
+
+.pcard {
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: block;
+}
+
+.pframe {
+  position: relative;
+}
+
+.pshot {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+  aspect-ratio: var(--card-ratio, 3 / 4);
+  width: 100%;
+  display: block;
+}
+
+.pshot .media,
+.pshot > .placeholder-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.1s var(--slow), opacity 0.5s var(--ease);
+}
+
+.pshot > .placeholder-svg {
+  fill: rgba(var(--color-text-rgb), 0.12);
+}
+
+.pcard:hover .pshot .media--primary {
+  transform: scale(1.05);
+}
+
+.pshot .media--alt {
+  opacity: 0;
+}
+
+.pcard:hover .pshot .media--alt {
+  opacity: 1;
+}
+
+.tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: calc(10px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(var(--color-bg-rgb), 0.9);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.tag.sage {
+  background: var(--color-accent-2);
+  color: #fff;
+}
+
+.tag.sold {
+  background: rgba(var(--color-text-rgb), 0.82);
+  color: var(--color-bg);
+}
+
+.wish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: rgba(var(--color-bg-rgb), 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--slow);
+}
+
+.pcard:hover .wish,
+.wish:focus-visible,
+.wish[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+.wish svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.wish[data-on] svg {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+
+.qadd {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.35s var(--ease), transform 0.4s var(--slow), background 0.3s;
+}
+
+.pcard:hover .qadd,
+.qadd:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.qadd:hover {
+  background: var(--color-button);
+  color: var(--color-button-text);
+}
+
+.qadd[data-loading] {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.pmeta {
+  padding: 14px 2px 0;
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+}
+
+.pmeta h3 {
+  font-size: calc(14.5px * var(--type-scale) * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.pmeta .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.pmeta .cat {
+  font-size: calc(11.5px * var(--ts, 1));
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.pmeta .pr {
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.pr .was {
+  color: var(--ink-60);
+  text-decoration: line-through;
+  margin-right: 7px;
+}
+
+.pr .now {
+  color: var(--color-accent-700);
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+
+.dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(var(--color-text-rgb), 0.16);
+}
+
+.dots .more {
+  font-size: 10px;
+  color: var(--ink-60);
+  line-height: 10px;
+}
+
+@media (max-width: 520px) {
+  .qadd,
+  .wish {
+    display: none;
+  }
+}
+
+/* ── marquee band ── */
+.band {
+  margin-top: clamp(56px, 8vw, 104px);
+  border-block: 1px solid var(--color-divider);
+  padding: 22px 0;
+  overflow: hidden;
+}
+
+.band .tick-run {
+  animation-duration: var(--tick-speed, 46s);
+  gap: 44px;
+  padding-left: 44px;
+}
+
+.band .tick-run span {
+  font-size: calc(13px * var(--type-scale) * var(--ts, 1));
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-70);
+  opacity: 1;
+}
+
+.band .tick-run em {
+  font-style: normal;
+  color: var(--color-accent-400);
+}
+
+/* ── category tiles ──
+   Mobile-first for the same inline-custom-property reason as .pgrid. */
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(10px, 1.4vw, 22px);
+}
+
+@media (min-width: 781px) {
+  .tiles {
+    grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  }
+}
+
+/* A sliding tile is deliberately the same width as a grid tile: the column
+   count and the gap are the same two values the grid uses, so switching a
+   section to the rail changes how it scrolls and nothing about how big it is.
+   On a phone the width is a peek instead, so the next category shows at the
+   edge and the row reads as scrollable without a scrollbar to say so. */
+.rail--tiles .tile {
+  flex: 0 0 78%;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 781px) {
+  .rail--tiles .tile {
+    flex: 0 0 calc(
+      (100% - (var(--cols, 3) - 1) * clamp(10px, 1.4vw, 22px)) / var(--cols, 3)
+    );
+  }
+}
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  border: 0;
+  padding: 0;
+  background: var(--color-surface);
+  aspect-ratio: 4 / 5;
+  display: block;
+  text-decoration: none;
+}
+
+.tile .media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.2s var(--slow);
+}
+
+.tile:hover .media {
+  transform: scale(1.06);
+}
+
+.tile .shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(var(--color-text-rgb), 0.52), transparent 58%);
+}
+
+.tile .cap {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  color: #fff;
+  text-align: left;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tile .cap h3 {
+  font-family: var(--font-heading);
+  font-size: calc(clamp(17px, 1.7vw, 24px) * var(--type-scale) * var(--ts, 1));
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0;
+  transition: transform 0.45s var(--slow);
+}
+
+.tile:hover .cap h3 {
+  transform: translateX(5px);
+}
+
+.tile .cap span {
+  font-size: calc(11px * var(--ts, 1));
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+
+/* ── editorial split ── */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: clamp(28px, 5vw, 88px);
+  align-items: center;
+  padding: clamp(56px, 8vw, 110px) 0;
+}
+
+.split.flip figure {
+  order: 2;
+}
+
+.split figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+}
+
+.split figure .media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.split .copy > * + * {
+  margin-top: 20px;
+}
+
+.plx {
+  will-change: transform;
+}
+
+@media (max-width: 880px) {
+  .split,
+  .split.flip {
+    grid-template-columns: 1fr;
+  }
+
+  .split figure,
+  .split.flip figure {
+    order: -1;
+  }
+}
+
+/* ── lookbook rail ── */
+.rail {
+  display: flex;
+  gap: clamp(10px, 1.4vw, 22px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  cursor: grab;
+  scrollbar-width: none;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail[data-drag] {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.rail[data-drag] a {
+  pointer-events: none;
+}
+
+.look {
+  flex: 0 0 clamp(240px, 27vw, 400px);
+  scroll-snap-align: start;
+  margin: 0;
+}
+
+.look .fr {
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+  aspect-ratio: 3 / 4;
+  display: block;
+  position: relative;
+}
+
+.look .media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.1s var(--slow);
+}
+
+.look:hover .media {
+  transform: scale(1.05);
+}
+
+.look figcaption,
+.look p {
+  margin: 12px 2px 0;
+  font-size: calc(12px * var(--ts, 1));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+/* ── values ──
+   Mobile-first for the same inline-custom-property reason as .pgrid. */
+.vals {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px clamp(20px, 3vw, 56px);
+  padding: clamp(48px, 6vw, 88px) 0;
+  border-top: 1px solid var(--color-divider);
+}
+
+@media (min-width: 461px) {
+  .vals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 881px) {
+  .vals {
+    grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  }
+}
+
+.section-values .vals {
+  margin-top: clamp(40px, 6vw, 80px);
+}
+
+.vals div h4 {
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  font-weight: 500;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.vals div p {
+  font-size: calc(13.5px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.6;
+  color: var(--ink-60);
+  margin: 0;
+}
+
+.vals .n {
+  font-size: calc(11px * var(--ts, 1));
+  letter-spacing: 0.18em;
+  color: var(--color-accent-400);
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* ── newsletter ── */
+.news {
+  background: var(--color-surface);
+  border-radius: var(--r);
+  margin-bottom: clamp(48px, 7vw, 96px);
+  padding: clamp(36px, 6vw, 76px) clamp(24px, 5vw, 72px);
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: 32px clamp(28px, 5vw, 80px);
+  align-items: end;
+}
+
+.news .frow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-divider);
+  transition: border-color 0.3s var(--ease);
+}
+
+.news .frow:focus-within {
+  border-color: var(--color-text);
+}
+
+.news .form-success,
+.news .form-error {
+  margin-top: 12px;
+}
+
+.news input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 12px 0;
+  font: inherit;
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  color: var(--color-text);
+}
+
+.news input:focus {
+  outline: none;
+}
+
+.news input::placeholder {
+  color: var(--ink-60);
+}
+
+.news .fine {
+  font-size: calc(12px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 14px 0 0;
+}
+
+@media (max-width: 880px) {
+  .news {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── footer ── */
+.ftr {
+  border-top: 1px solid var(--color-divider);
+}
+
+.ftr .cols {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(auto-fit, minmax(140px, 1fr));
+  gap: 36px clamp(20px, 3vw, 56px);
+  padding: clamp(44px, 6vw, 76px) 0 44px;
+}
+
+.ftr h5 {
+  font-size: calc(10.5px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  margin: 0 0 16px;
+}
+
+.ftr ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+
+.ftr a {
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  color: var(--ink-80);
+  text-decoration: none;
+  transition: color 0.25s var(--ease);
+}
+
+.ftr a:hover {
+  color: var(--color-accent-700);
+}
+
+.ftr .mark {
+  font-family: var(--font-heading);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  margin: 0 0 12px;
+}
+
+.ftr .mark img {
+  width: var(--logo-width, 130px);
+  height: auto;
+}
+
+.ftr .about {
+  font-size: calc(13.5px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.65;
+  color: var(--ink-60);
+  margin: 0;
+  max-width: 32ch;
+}
+
+.ftr .socials {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ftr .socials a {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+
+.ftr .socials svg {
+  width: 17px;
+  height: 17px;
+  fill: currentcolor;
+}
+
+.ftr .base {
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 20px 0 32px;
+  font-size: calc(11.5px * var(--ts, 1));
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.ftr .base .payment {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ftr .base .payment svg {
+  height: 22px;
+  width: auto;
+}
+
+.ftr .locale-forms {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ftr .locale-forms select {
+  background: none;
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+  cursor: pointer;
+}
+
+@media (max-width: 880px) {
+  .ftr .cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── collection view ── */
+.chead {
+  padding: clamp(28px, 4vw, 56px) 0 26px;
+}
+
+.crumb {
+  font-size: calc(11px * var(--ts, 1));
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  margin: 0 0 16px;
+}
+
+.crumb a {
+  text-decoration: none;
+}
+
+.crumb a:hover {
+  color: var(--color-accent-700);
+}
+
+.chead .dsp {
+  font-size: calc(clamp(34px, 4.4vw, 64px) * var(--type-scale) * var(--ts, 1));
+}
+
+.chead .body {
+  margin-top: 18px;
+}
+
+.cbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+  border-block: 1px solid var(--color-divider);
+  margin-bottom: 26px;
+  position: sticky;
+  top: 62px;
+  background: rgba(var(--color-bg-rgb), 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 20;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  border-radius: 999px;
+  padding: 8px 17px;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--color-divider);
+  font-size: calc(11.5px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-70);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease), background 0.3s var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--color-accent-400);
+  color: var(--color-accent-700);
+}
+
+.chip[data-on] {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+.chip .x {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.cbar .n {
+  font-size: calc(11.5px * var(--ts, 1));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.cbar .right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.cbar select {
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+  cursor: pointer;
+  padding-right: 16px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentcolor 50%),
+    linear-gradient(135deg, currentcolor 50%, transparent 50%);
+  background-position: calc(100% - 6px) center, calc(100% - 1px) center;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.collection-empty {
+  padding: clamp(48px, 8vw, 96px) 0;
+}
+
+/* pagination */
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(40px, 6vw, 72px) 0 0;
+}
+
+.pager a,
+.pager span {
+  min-width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 12.5px;
+  text-decoration: none;
+  color: var(--ink-70);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.pager a:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.pager .on {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+/* ── product view ── */
+.pdp {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(28px, 4vw, 72px);
+  padding: clamp(20px, 3vw, 40px) 0 clamp(56px, 8vw, 100px);
+  align-items: start;
+}
+
+.pdp-shots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+.pdp-shots > .shot {
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+}
+
+.pdp-shots .media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.pdp-shots .wide {
+  grid-column: 1 / -1;
+}
+
+.pdp-shots .wide .media {
+  aspect-ratio: 16 / 10;
+}
+
+.pdp-shots .media--video iframe,
+.pdp-shots .media--video video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pdp-info {
+  position: sticky;
+  top: 92px;
+}
+
+.pdp-info h1 {
+  font-family: var(--font-heading);
+  font-size: calc(clamp(26px, 2.9vw, 40px) * var(--type-scale) * var(--ts, 1));
+  font-weight: 400;
+  letter-spacing: var(--heading-tracking);
+  line-height: 1.08;
+  margin: 0 0 12px;
+}
+
+.pdp-price {
+  font-size: calc(19px * var(--type-scale) * var(--ts, 1));
+  margin: 0;
+  color: var(--color-accent-700);
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.pdp-price .was {
+  color: var(--ink-60);
+  text-decoration: line-through;
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+}
+
+.pdp-price .badge {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--color-accent-2);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.pdp-unit {
+  font-size: calc(12px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 6px 0 0;
+}
+
+.pdp-desc {
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.7;
+  color: var(--ink-70);
+  margin: 22px 0 0;
+  max-width: 44ch;
+}
+
+.opt {
+  border-top: 1px solid var(--color-divider);
+  margin-top: 28px;
+  padding-top: 18px;
+}
+
+.opt .ol {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  font-size: calc(11px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.opt .ol em {
+  font-style: normal;
+  color: var(--ink-60);
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-weight: 400;
+  font-size: 12.5px;
+}
+
+.opt .ol a {
+  color: var(--ink-60);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 12.5px;
+}
+
+.sws {
+  display: flex;
+  /* Wide enough that the selected swatch's outer ring, which is drawn
+     with box-shadow and so takes no layout space, never crowds its
+     neighbours. */
+  gap: 18px;
+  padding: 3px 0;
+  flex-wrap: wrap;
+}
+
+.sws label {
+  cursor: pointer;
+}
+
+.sws input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Every swatch carries a permanent inset edge, so a white or very pale
+   colour still reads as a circle against a pale ground. The selected
+   state is an outer ring separated by a gap in the page colour, which
+   stays legible whatever the swatch itself is filled with. Using inset
+   shadow rather than a border keeps all swatches the same size. */
+.sw {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  /* A visible neutral, so a swatch whose colour could not be resolved is
+     still a circle you can click rather than an invisible gap. */
+  background-color: var(--color-surface);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(var(--color-text-rgb), 0.28);
+  transition: transform 0.3s var(--slow), box-shadow 0.3s var(--ease);
+}
+
+.sw:hover {
+  transform: scale(1.08);
+}
+
+/* Selected reads as a target: the colour, a clear ring of page colour,
+   then a solid outer ring. Because the gap is painted in the page
+   colour rather than left transparent, it stays crisp over the tinted
+   card ground too. */
+.sws input:checked + .sw,
+.sw[data-on] {
+  box-shadow: inset 0 0 0 1px rgba(var(--color-text-rgb), 0.28), 0 0 0 4px var(--color-bg),
+    0 0 0 6px var(--color-text);
+}
+
+.sws input:focus-visible + .sw {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.sws .sw[data-unavailable]::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    rgba(var(--color-text-rgb), 0.5) 50%,
+    transparent calc(50% + 1px)
+  );
+}
+
+.sizes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sizes label {
+  cursor: pointer;
+}
+
+.sizes input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.size {
+  min-width: 52px;
+  height: 42px;
+  padding: 0 14px;
+  cursor: pointer;
+  border-radius: 999px;
+  background: none;
+  border: 1px solid var(--color-divider);
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.28s var(--ease), background 0.28s var(--ease), color 0.28s var(--ease),
+    opacity 0.28s var(--ease);
+}
+
+.size:hover {
+  border-color: var(--color-text);
+}
+
+.sizes input:checked + .size,
+.size[data-on] {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+.sizes input:focus-visible + .size {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.size[data-unavailable] {
+  opacity: 0.38;
+  text-decoration: line-through;
+}
+
+.opt select.opt-select {
+  width: 100%;
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  padding: 12px 18px;
+  font: inherit;
+  font-size: 13px;
+  background-color: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentcolor 50%),
+    linear-gradient(135deg, currentcolor 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% + 1px), calc(100% - 15px) calc(50% + 1px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.addrow {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.addrow .b-solid {
+  flex: 1;
+  justify-content: space-between;
+}
+
+.iconb {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid var(--color-divider);
+  background: none;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.28s var(--ease);
+}
+
+.iconb:hover {
+  border-color: var(--color-text);
+}
+
+.iconb svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.4;
+}
+
+.iconb[data-on] svg {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+
+.pdp-payment {
+  margin-top: 10px;
+}
+
+/* The dynamic checkout button. Shopify injects its own high-specificity
+   styles here, so these need !important to land.
+
+   Only the unbranded "Buy it now" button is recoloured. The branded Shop
+   Pay button is deliberately left alone — its colour is Shopify's brand
+   furniture, and restyling it breaks the recognition that makes an
+   accelerated checkout button worth having. */
+.pdp-payment .shopify-payment-button__button--unbranded {
+  background: var(--btn-bg, var(--color-button)) !important;
+  color: var(--btn-fg, var(--color-button-text)) !important;
+}
+
+.pdp-payment .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+  background: var(--btn-hover, var(--color-button-hover)) !important;
+}
+
+.pdp-payment .shopify-payment-button__button {
+  border-radius: 999px !important;
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  min-height: 48px !important;
+}
+
+.ship {
+  font-size: calc(12.5px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 16px 0 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ship i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-accent-2);
+  flex: none;
+}
+
+.ship.out i {
+  background: rgba(var(--color-text-rgb), 0.3);
+}
+
+/* Each collapsible row is its own .acc so merchants can reorder them
+   freely. Bottom-only borders mean any number of them stack into one
+   clean rule set, with the first adding the opening line. */
+.acc {
+  margin-top: 0;
+}
+
+.acc--first {
+  margin-top: 32px;
+}
+
+.acc details {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.acc--first > details:first-child {
+  border-top: 1px solid var(--color-divider);
+}
+
+.acc summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: calc(11.5px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.acc summary::-webkit-details-marker {
+  display: none;
+}
+
+.acc summary::after {
+  content: '';
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-right: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.35s var(--slow);
+}
+
+.acc details[open] summary::after {
+  transform: rotate(225deg) translate(-3px, -3px);
+}
+
+.acc .in {
+  padding: 0 0 18px;
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.65;
+  color: var(--ink-70);
+  max-width: 46ch;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .pdp {
+    grid-template-columns: 1fr;
+  }
+
+  .pdp-info {
+    position: static;
+  }
+}
+
+/* ══ gallery product layout ═══════════════════════════════════════
+   One large stage with edge arrows and a thumbnail strip, with the buy
+   controls floating in a card over a surface-toned ground. */
+.pdp-shell--surface {
+  background: var(--color-surface);
+}
+
+/* The media column is sized from the capped image rather than taking a
+   free 1fr. Otherwise the stage keeps the full column width while the
+   image letterboxes inside it, leaving a large dead gap before the
+   details. --stage-ar and --thumb-rail are set on .pdp by the section. */
+.pdp--gallery {
+  grid-template-columns:
+    minmax(0, calc(var(--stage-max, 75vh) * var(--stage-ar, 1) + var(--thumb-rail, 0px)))
+    minmax(300px, 1fr);
+  gap: clamp(20px, 2.5vw, 44px);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .pdp--gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gallery {
+  position: relative;
+}
+
+/* ── thumbnails beside the stage ──────────────────────────────────
+   The stage comes first in the DOM (it is the important content, and
+   should be what a screen reader and a no-CSS render reach first), so
+   the columns are assigned explicitly rather than relying on source
+   order. Both children sit on row 1. */
+@media (min-width: 750px) {
+  .gallery--thumbs-left,
+  .gallery--thumbs-right {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+
+  .gallery--thumbs-left .gallery-stage {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .gallery--thumbs-left .gallery-thumbs {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .gallery--thumbs-right {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .gallery--thumbs-right .gallery-stage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .gallery--thumbs-right .gallery-thumbs {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .gallery--thumbs-left .gallery-thumbs,
+  .gallery--thumbs-right .gallery-thumbs {
+    flex-direction: column;
+    margin-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: var(--stage-max, 75vh);
+  }
+
+  .gallery--thumbs-left .gallery-thumb,
+  .gallery--thumbs-right .gallery-thumb {
+    width: clamp(52px, 5vw, 74px);
+  }
+}
+
+.gallery-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+  aspect-ratio: var(--stage-ratio, 1 / 1);
+  /* Cap against the viewport so the buy controls stay in view. The
+     aspect ratio still drives the shape; this only stops a tall image
+     from pushing the details below the fold. */
+  max-height: var(--stage-max, 75vh);
+}
+
+.pdp-shell--surface .gallery-stage {
+  background: transparent;
+}
+
+.gallery-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s var(--ease), visibility 0.45s;
+}
+
+.gallery-slide[data-active] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gallery-slide .media {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* `cover` fills the frame edge to edge. `contain` fits the whole photo in,
+   which letterboxes whenever the photo's shape differs from the frame's —
+   right for cut-out shots on a tinted ground, wrong for full-bleed
+   photography, where it reads as unwanted padding down the sides. */
+.gallery-slide .media > img {
+  object-fit: var(--stage-fit, cover);
+  padding: var(--stage-pad, 0px);
+}
+
+.gallery-slide .media--video iframe,
+.gallery-slide .media--video video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: rgba(var(--color-bg-rgb), 0.75);
+  color: var(--color-text);
+  transition: opacity 0.3s var(--ease), background 0.3s var(--ease);
+}
+
+/* Reveal-on-hover is only meaningful where a pointer can hover. Touch
+   devices get the arrows permanently, rather than relying on a
+   max-width override to undo a hide they could never reverse. */
+@media (hover: hover) {
+  .gallery-nav {
+    opacity: 0;
+  }
+
+  .gallery:hover .gallery-nav,
+  .gallery-nav:focus-visible {
+    opacity: 1;
+  }
+}
+
+.gallery-nav:hover {
+  background: var(--color-bg);
+}
+
+.gallery-nav[disabled] {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.gallery-nav.prev {
+  left: 10px;
+}
+
+.gallery-nav.next {
+  right: 10px;
+}
+
+.gallery-nav svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.5;
+}
+
+@media (max-width: 700px) {
+  .gallery-nav {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.gallery-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-thumb {
+  flex: 0 0 auto;
+  width: clamp(58px, 6vw, 84px);
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-surface);
+  border: 1px solid transparent;
+  transition: border-color 0.25s var(--ease);
+}
+
+.pdp-shell--surface .gallery-thumb {
+  background: var(--color-bg);
+}
+
+.gallery-thumb .media {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Thumbnails follow the stage, so the strip reads as the same photography. */
+.gallery-thumb .media > img {
+  object-fit: var(--stage-fit, cover);
+  padding: var(--stage-thumb-pad, 0px);
+}
+
+.gallery-thumb[data-active] {
+  border-color: var(--color-text);
+}
+
+/* ── flush-left retail details column ─────────────────────────────
+   Matches the conventional fashion PDP: uppercase letter-spaced title,
+   a quiet subtitle, sizes as underlined text rather than boxes, and the
+   quantity stepper welded to the add button. */
+.pdp-info h1.upper {
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  font-size: calc(clamp(20px, 1.9vw, 26px) * var(--type-scale) * var(--ts, 1));
+}
+
+.pdp-subtitle {
+  font-size: calc(13.5px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 4px 0 0;
+}
+
+/* Sizes as underlined text. The rule under each value carries the
+   state: faint when the size exists, solid when chosen, faded when it
+   is not available in the selected colour. */
+.sizes--underline {
+  gap: 16px;
+}
+
+.sizes--underline .size {
+  min-width: 0;
+  height: auto;
+  padding: 0 3px 7px;
+  border: 0;
+  border-bottom: 2px solid var(--color-divider);
+  border-radius: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: calc(14px * var(--ts, 1));
+}
+
+.sizes--underline .size:hover {
+  border-bottom-color: rgba(var(--color-text-rgb), 0.5);
+}
+
+.sizes--underline input:checked + .size {
+  background: none;
+  color: var(--color-text);
+  border-bottom-color: var(--color-text);
+}
+
+.sizes--underline .size[data-unavailable] {
+  opacity: 0.34;
+  text-decoration: none;
+}
+
+/* Quantity welded to the add button, as one control bar. */
+.addrow--inline {
+  gap: 0;
+  align-items: stretch;
+}
+
+.addrow--inline .qty {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface);
+  padding: 0 4px;
+}
+
+.addrow--inline .qty button {
+  width: 40px;
+  height: 100%;
+  border-radius: 0;
+}
+
+.addrow--inline .qty button:hover {
+  background: rgba(var(--color-text-rgb), 0.06);
+}
+
+.addrow--inline .qty input {
+  width: 46px;
+}
+
+.addrow--inline .b-solid {
+  flex: 1;
+  min-height: 54px;
+  justify-content: center;
+}
+
+/* Square corners on the buy controls. */
+.pdp-info.sq .b,
+.pdp-info.sq .qty,
+.pdp-info.sq .qty button,
+.pdp-info.sq .iconb,
+.pdp-info.sq .shopify-payment-button__button {
+  border-radius: 0 !important;
+}
+
+/* ── compact details column ───────────────────────────────────────
+   Tightens the vertical rhythm so title, price, options and the add
+   button all land above the fold, as on a typical fashion PDP. */
+.pdp-info.compact h1 {
+  margin-bottom: 6px;
+}
+
+.pdp-info.compact .opt {
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.pdp-info.compact .opt .ol {
+  margin-bottom: 9px;
+}
+
+.pdp-info.compact .pdp-desc {
+  margin: 14px 0 0;
+}
+
+.pdp-info.compact .addrow {
+  margin-top: 16px;
+}
+
+.pdp-info.compact .ship {
+  margin-top: 10px;
+}
+
+.pdp-info.compact .acc {
+  margin-top: 0;
+}
+
+.pdp-info.compact .acc--first {
+  margin-top: 18px;
+}
+
+.pdp-info.compact .acc summary {
+  padding: 12px 0;
+}
+
+.pdp-info.compact .acc .in {
+  padding-bottom: 14px;
+}
+
+.pdp-info.compact .pdp-links {
+  margin-top: 14px;
+}
+
+.pdp-info.compact .sw {
+  width: 30px;
+  height: 30px;
+}
+
+.pdp-info.compact .size {
+  min-width: 46px;
+  height: 38px;
+}
+
+/* ── floating buy card ── */
+.pdp-card {
+  background: var(--color-bg);
+  border-radius: var(--r);
+  padding: clamp(22px, 2.4vw, 38px);
+  box-shadow: 0 8px 40px rgba(var(--color-text-rgb), 0.07);
+}
+
+.pdp-card.center {
+  text-align: center;
+}
+
+.pdp-card.center .pdp-price,
+.pdp-card.center .sws,
+.pdp-card.center .sizes,
+.pdp-card.center .ship {
+  justify-content: center;
+}
+
+.pdp-card.center .pdp-desc,
+.pdp-card.center .acc .in {
+  max-width: none;
+}
+
+.pdp-card.center .opt .ol {
+  justify-content: center;
+  gap: 8px;
+}
+
+.pdp-card .opt {
+  border-top: 0;
+  margin-top: 22px;
+  padding-top: 0;
+}
+
+.pdp-card .opt .ol {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.pdp-card .opt .ol em {
+  color: var(--ink-60);
+  font-size: 13px;
+}
+
+/* full-width squared action button, as in the reference layout */
+.b-block {
+  width: 100%;
+  justify-content: center;
+  border-radius: 2px;
+  padding-block: 17px;
+}
+
+.pdp-card .addrow {
+  margin-top: 26px;
+  gap: 8px;
+}
+
+.pdp-card .iconb {
+  border-radius: 2px;
+}
+
+.pdp-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.pdp-links button,
+.pdp-links a {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s var(--ease);
+}
+
+.pdp-links button:hover,
+.pdp-links a:hover {
+  border-bottom-color: var(--color-text);
+}
+
+/* ── image swatches ── */
+.sw--image {
+  width: 46px;
+  height: 58px;
+  border-radius: 2px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-surface);
+}
+
+/* Photo swatches take the same ring. They used to mark themselves with
+   border-color, which stopped working once .sw dropped its border in
+   favour of an inset shadow — leaving them with no selected state. */
+.sws input:checked + .sw--image,
+.sw--image[data-on] {
+  box-shadow: inset 0 0 0 1px rgba(var(--color-text-rgb), 0.28), 0 0 0 3px var(--color-bg),
+    0 0 0 5px var(--color-text);
+}
+
+/* ── squared size chips ── */
+.sizes--box .size {
+  border-radius: 2px;
+  min-width: 62px;
+  height: 52px;
+  background: var(--color-surface);
+  border-color: transparent;
+}
+
+.pdp-shell--surface .sizes--box .size {
+  background: var(--color-surface);
+}
+
+.sizes--box input:checked + .size {
+  background: var(--color-bg);
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+/* ── carousel rail with arrows ── */
+.rail-wrap {
+  position: relative;
+}
+
+.rail-nav {
+  position: absolute;
+  top: calc(var(--rail-nav-top, 38%));
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: rgba(var(--color-bg-rgb), 0.86);
+  box-shadow: 0 2px 14px rgba(var(--color-text-rgb), 0.12);
+  color: var(--color-text);
+  transition: opacity 0.3s var(--ease);
+}
+
+@media (hover: hover) {
+  .rail-nav {
+    opacity: 0;
+  }
+
+  .rail-wrap:hover .rail-nav,
+  .rail-nav:focus-visible {
+    opacity: 1;
+  }
+}
+
+.rail-nav[disabled] {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.rail-nav.prev {
+  left: -8px;
+}
+
+.rail-nav.next {
+  right: -8px;
+}
+
+.rail-nav svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.6;
+}
+
+@media (max-width: 700px) {
+  .rail-nav {
+    display: none;
+  }
+}
+
+.rail--cards .pcard {
+  flex: 0 0 clamp(210px, 23vw, 300px);
+  scroll-snap-align: start;
+}
+
+/* ── product card variants ── */
+.pcard.center {
+  text-align: center;
+}
+
+.pcard.center .pmeta {
+  justify-items: center;
+}
+
+.pcard.center .pmeta .row {
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pcard.center .dots {
+  justify-content: center;
+}
+
+.pshot--pad .media {
+  inset: var(--card-pad, 22px);
+  width: auto;
+  height: auto;
+}
+
+.pshot--pad .media > img {
+  object-fit: contain;
+}
+
+/* plain "+" quick add, bottom-right of the tile */
+.qadd--plus {
+  left: auto;
+  right: 6px;
+  bottom: 6px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  background: none;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 1;
+  transform: none;
+}
+
+.qadd--plus:hover {
+  background: rgba(var(--color-bg-rgb), 0.8);
+  color: var(--color-text);
+}
+
+@media (max-width: 520px) {
+  .qadd--plus {
+    display: grid;
+  }
+}
+
+/* image-based colour dots on cards */
+.dots--image i {
+  width: 34px;
+  height: 42px;
+  border-radius: 2px;
+  box-shadow: none;
+  border: 1px solid var(--color-divider);
+  background-size: cover;
+  background-position: center;
+}
+
+.dots--image i[data-on] {
+  border-color: var(--color-text);
+}
+
+/* ── drawers (bag + nav) ── */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(var(--color-text-rgb), 0.34);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.scrim[data-open] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  width: min(452px, 100vw);
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.55s var(--slow);
+}
+
+.drawer[data-open] {
+  transform: none;
+}
+
+.drawer header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.drawer header h2 {
+  font-size: calc(13px * var(--ts, 1));
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.drawer header button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.drawer header button:hover {
+  color: var(--color-text);
+}
+
+.lines {
+  flex: 1;
+  overflow: auto;
+  padding: 0 26px;
+}
+
+.li {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 16px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-divider);
+  animation: liIn 0.5s var(--slow) both;
+}
+
+@keyframes liIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.li .th {
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--color-surface);
+  aspect-ratio: 3 / 4;
+  display: block;
+}
+
+.li .th .media {
+  width: 100%;
+  height: 100%;
+}
+
+.li h4 {
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  font-weight: 500;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.li h4 a {
+  text-decoration: none;
+}
+
+.li .vr {
+  font-size: calc(12px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 0 0 12px;
+}
+
+.li .vr span {
+  display: block;
+}
+
+.li .fr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.li[data-busy] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.li .discount {
+  font-size: 11.5px;
+  color: var(--color-accent-2-700);
+  margin: 0 0 8px;
+}
+
+.qty {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+}
+
+.qty button {
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 999px;
+  transition: background 0.25s var(--ease);
+}
+
+.qty button:hover {
+  background: var(--color-accent-100);
+}
+
+.qty span,
+.qty input {
+  min-width: 26px;
+  width: 30px;
+  text-align: center;
+  font-size: 13px;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+  -moz-appearance: textfield;
+}
+
+.qty input::-webkit-outer-spin-button,
+.qty input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.li .lp {
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+}
+
+.li .rm {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  border-bottom: 1px solid transparent;
+}
+
+.li .rm:hover {
+  color: var(--color-text);
+  border-bottom-color: var(--color-divider);
+}
+
+.empty {
+  padding: 64px 0;
+  text-align: left;
+}
+
+.empty p {
+  font-size: calc(14.5px * var(--type-scale) * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 0 0 20px;
+  max-width: 30ch;
+}
+
+.drawer footer {
+  border-top: 1px solid var(--color-divider);
+  padding: 22px 26px 26px;
+  display: grid;
+  gap: 10px;
+}
+
+.tot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: calc(12.5px * var(--ts, 1));
+  color: var(--ink-60);
+}
+
+.tot.sum {
+  font-size: calc(16px * var(--type-scale) * var(--ts, 1));
+  color: var(--color-text);
+  padding-top: 6px;
+}
+
+.tot.sum b {
+  font-weight: 500;
+}
+
+.prog {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.prog i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--color-accent-2);
+  transition: width 0.6s var(--slow);
+}
+
+.freenote {
+  font-size: calc(11.5px * var(--ts, 1));
+  color: var(--ink-60);
+  margin: 0 0 6px;
+}
+
+.drawer .b-solid {
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.drawer .fine {
+  font-size: 11px;
+  color: var(--ink-60);
+  margin: 0;
+}
+
+.drawer .cart-note {
+  margin-top: 4px;
+}
+
+.drawer .cart-note summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  padding: 6px 0;
+}
+
+.drawer .cart-note summary::-webkit-details-marker {
+  display: none;
+}
+
+.drawer .cart-note textarea {
+  width: 100%;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--r);
+  background: none;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* ── toast ── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  translate: -50% 0;
+  z-index: 90;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-radius: 999px;
+  padding: 13px 26px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--slow);
+}
+
+.toast[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── search ── */
+.search-panel {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 75;
+  background: var(--color-bg);
+  padding: 26px var(--edge) 30px;
+  transform: translateY(-100%);
+  transition: transform 0.5s var(--slow);
+  box-shadow: 0 12px 40px rgba(var(--color-text-rgb), 0.1);
+}
+
+.search-panel[data-open] {
+  transform: none;
+}
+
+.search-panel form {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.search-panel input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 12px 0;
+  font: inherit;
+  font-size: calc(clamp(20px, 2.4vw, 30px) * var(--type-scale) * var(--ts, 1));
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.search-panel input:focus {
+  outline: none;
+}
+
+.search-panel input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.predictive {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-top: 22px;
+}
+
+.predictive ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.predictive a {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: var(--r);
+  text-decoration: none;
+  transition: background 0.2s var(--ease);
+}
+
+.predictive a:hover,
+.predictive a[aria-selected='true'] {
+  background: var(--color-surface);
+}
+
+.predictive .th {
+  aspect-ratio: 3 / 4;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.predictive h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.predictive .cat {
+  font-size: 11.5px;
+  color: var(--ink-60);
+}
+
+.predictive .pr {
+  font-size: 13.5px;
+}
+
+.predictive .lab {
+  margin-bottom: 10px;
+}
+
+/* ── generic page + editorial templates ── */
+.page-head {
+  padding: clamp(40px, 6vw, 88px) 0 clamp(20px, 3vw, 34px);
+  max-width: 46ch;
+}
+
+.page-body {
+  padding-bottom: clamp(56px, 8vw, 110px);
+  max-width: 68ch;
+  font-size: calc(15.5px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.75;
+  color: var(--ink-80);
+}
+
+.article-hero {
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: clamp(24px, 4vw, 48px);
+}
+
+.article-hero .media {
+  aspect-ratio: 16 / 9;
+}
+
+.article-meta {
+  font-size: calc(11px * var(--ts, 1));
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  margin: 0 0 14px;
+}
+
+.bgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: clamp(24px, 3vw, 44px);
+  padding-bottom: clamp(56px, 8vw, 100px);
+}
+
+.bcard {
+  display: grid;
+  gap: 14px;
+  text-decoration: none;
+}
+
+.bcard .media {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r);
+  transition: transform 1.1s var(--slow);
+}
+
+.bcard .fr {
+  overflow: hidden;
+  border-radius: var(--r);
+}
+
+.bcard:hover .media {
+  transform: scale(1.04);
+}
+
+.bcard h3 {
+  font-family: var(--font-heading);
+  font-size: calc(19px * var(--type-scale) * var(--ts, 1));
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.bcard p {
+  font-size: 14px;
+  color: var(--ink-60);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── cart page ── */
+.cart-page {
+  padding: clamp(28px, 4vw, 56px) 0 clamp(56px, 8vw, 100px);
+}
+
+.cart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: start;
+}
+
+.cart-table {
+  display: grid;
+}
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 104px 1fr auto;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--color-divider);
+  align-items: start;
+}
+
+.cart-row .th {
+  border-radius: var(--r);
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  display: block;
+}
+
+.cart-row h3 {
+  font-size: calc(15px * var(--type-scale) * var(--ts, 1));
+  font-weight: 500;
+  margin: 0 0 5px;
+  letter-spacing: -0.01em;
+}
+
+.cart-row h3 a {
+  text-decoration: none;
+}
+
+.cart-summary {
+  position: sticky;
+  top: 100px;
+  background: var(--color-surface);
+  border-radius: var(--r);
+  padding: clamp(24px, 3vw, 34px);
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 880px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-summary {
+    position: static;
+  }
+
+  .cart-row {
+    grid-template-columns: 84px 1fr;
+  }
+
+  .cart-row .end {
+    grid-column: 2;
+  }
+}
+
+/* ── customer accounts ── */
+.account {
+  padding: clamp(40px, 6vw, 88px) 0 clamp(56px, 8vw, 100px);
+}
+
+.account-form {
+  max-width: 420px;
+  display: grid;
+  gap: 22px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: clamp(28px, 5vw, 72px);
+  align-items: start;
+}
+
+.account-nav {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.account-nav a {
+  font-size: 13.5px;
+  text-decoration: none;
+  color: var(--ink-70);
+}
+
+.account-nav a:hover {
+  color: var(--color-accent-700);
+}
+
+.otable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.otable th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  padding: 0 12px 12px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.otable td {
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--color-divider);
+  vertical-align: top;
+}
+
+.otable a {
+  text-decoration: none;
+  color: var(--color-accent-700);
+}
+
+@media (max-width: 780px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .otable {
+    font-size: 12.5px;
+  }
+}
+
+/* ── 404 ── */
+.notfound {
+  padding: clamp(70px, 12vw, 170px) 0;
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+  max-width: 46ch;
+}
+
+/* ── password ── */
+.pw {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--edge);
+  text-align: center;
+}
+
+.pw-inner {
+  display: grid;
+  gap: 22px;
+  justify-items: center;
+  max-width: 42ch;
+}
+
+.pw form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--color-divider);
+  width: min(360px, 100%);
+}
+
+.pw input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 12px 0;
+  font: inherit;
+  color: inherit;
+}
+
+.pw input:focus {
+  outline: none;
+}
+
+/* ── section spacing helper ── */
+.sec-pad-top {
+  padding-top: clamp(40px, var(--pad-top, 6vw), 120px);
+}
+
+.sec-pad-bottom {
+  padding-bottom: clamp(40px, var(--pad-bottom, 6vw), 120px);
+}
+
+/* Shopify design-mode helpers */
+.shopify-section:empty {
+  display: none;
+}
+
+/* Placeholder cards are not links — nothing to open — so don't invite
+   the click with a pointer cursor. */
+.pcard.is-placeholder .pshot,
+.pcard.is-placeholder .pmeta {
+  cursor: default;
+}
+
+/* Shown only inside the theme editor, to explain why a section that has
+   not been set up yet does nothing when clicked. */
+.setup-note {
+  margin: 20px 0 0;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  font-size: calc(13px * var(--ts, 1));
+  line-height: 1.5;
+}

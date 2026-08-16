@@ -1,0 +1,133 @@
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  {%- if section.blocks.size > 0 -%}
+    <div class="band" style="--tick-speed: {{ section.settings.speed }}s;">
+      <div class="tick-run" aria-hidden="true">
+        {%- for block in section.blocks -%}
+          {%- capture text_style %}{% render 'text-style', s: block.settings, key: 'text' %}{% endcapture -%}
+          <span style="{{ text_style }}">{{ block.settings.text }}</span>
+          <span>&middot;</span>
+        {%- endfor -%}
+      </div>
+
+      <ul class="visually-hidden">
+        {%- for block in section.blocks -%}
+          <li>{{ block.settings.text | strip_html }}</li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Marquee band",
+  "tag": "section",
+  "class": "section-marquee",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Seconds per loop",
+      "info": "Higher is slower. The band pauses on hover.",
+      "min": 20,
+      "max": 120,
+      "step": 2,
+      "default": 46
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "label": "Text",
+          "info": "Italic text is picked out in the accent colour.",
+          "default": "Named mills <em>—</em> Cariaggi cashmere"
+        },
+        {
+          "type": "header",
+          "content": "Message type"
+        },
+        {
+          "type": "select",
+          "id": "text_font",
+          "label": "Font",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "heading",
+              "label": "Heading font"
+            },
+            {
+              "value": "body",
+              "label": "Body font"
+            },
+            {
+              "value": "accent",
+              "label": "Accent font"
+            }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "range",
+          "id": "text_size",
+          "label": "Size",
+          "min": 50,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Colour",
+          "info": "Leave empty to follow the colour scheme."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee band",
+      "blocks": [
+        {
+          "type": "message"
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "Cut and sewn in Porto"
+          }
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "Free repairs for life"
+          }
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "Two drops a year, never a sale"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

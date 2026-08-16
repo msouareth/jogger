@@ -1,0 +1,88 @@
+<div class="wrap">
+  <div class="chead">
+    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+    <h1 class="dsp">
+      {%- if search.terms != blank -%}
+        {{ 'general.search.results_for' | t: terms: search.terms }}
+      {%- else -%}
+        {{ 'general.search.title' | t }}
+      {%- endif -%}
+    </h1>
+  </div>
+
+  <form action="{{ routes.search_url }}" method="get" role="search" class="field" style="max-width: 480px;">
+    <label class="visually-hidden" for="SearchPageInput">{{ 'general.search.title' | t }}</label>
+    <input
+      type="search"
+      id="SearchPageInput"
+      name="q"
+      value="{{ search.terms | escape }}"
+      placeholder="{{ 'general.search.placeholder' | t }}"
+    >
+  </form>
+
+  {%- if search.performed -%}
+    <div class="cbar" style="margin-top: 26px;">
+      <span class="n">{{ 'general.search.results_count' | t: count: search.results_count }}</span>
+    </div>
+
+    {%- if search.results_count > 0 -%}
+      {%- paginate search.results by 24 -%}
+        <div class="pgrid" style="--cols: {{ section.settings.columns }};">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card',
+                product: item,
+                index: forloop.index0,
+                sizes: '(min-width: 1100px) 25vw, 50vw'
+              %}
+            {%- else -%}
+              {%- assign result_image = item.image | default: item.featured_image -%}
+              <a class="bcard" href="{{ item.url }}">
+                <span class="fr">
+                  {% render 'media',
+                    image: result_image,
+                    ratio: '3 / 4',
+                    sizes: '(min-width: 1100px) 25vw, 50vw',
+                    placeholder: 'image'
+                  %}
+                </span>
+                <h3>{{ item.title | escape }}</h3>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {% render 'pagination', paginate: paginate %}
+      {%- endpaginate -%}
+    {%- else -%}
+      <div class="collection-empty">
+        <p class="body">{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+
+  <div style="height: clamp(56px, 8vw, 100px);"></div>
+</div>
+
+{% schema %}
+{
+  "name": "Search",
+  "tag": "section",
+  "class": "section-search",
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "enabled_on": {
+    "templates": ["search"]
+  }
+}
+{% endschema %}

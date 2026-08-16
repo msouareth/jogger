@@ -1,0 +1,101 @@
+{%- comment -%}
+  Resolves an option value's name to a usable CSS colour.
+
+  When a merchant has not set swatches in the admin, the theme's only clue is
+  the value's name — and fashion colour names are almost never valid CSS.
+  "Almond" or "Clay" as a background-color is an invalid declaration, which
+  the browser drops, leaving an empty circle.
+
+  This maps the common apparel vocabulary to real values, passes through
+  anything already a hex or a genuine CSS keyword, and otherwise returns
+  blank so the caller can show a neutral placeholder rather than nothing.
+
+  Admin swatches always take priority — this is the fallback.
+
+  Accepts:
+  - name {String} the option value, e.g. "Pale Sage"
+{%- endcomment -%}
+
+{%- liquid
+  assign key = name | downcase | strip | replace: ' ', '' | replace: '-', '' | replace: '_', ''
+  assign hex = ''
+
+  case key
+    when 'oat'
+      assign hex = '#ddd2c0'
+    when 'clay'
+      assign hex = '#b09077'
+    when 'sage'
+      assign hex = '#9aa694'
+    when 'palesage'
+      assign hex = '#b8c2b4'
+    when 'espresso'
+      assign hex = '#4a3c31'
+    when 'chalk'
+      assign hex = '#efe9df'
+    when 'almond'
+      assign hex = '#e3d8c8'
+    when 'stone'
+      assign hex = '#7d746a'
+    when 'ink'
+      assign hex = '#2f2b26'
+    when 'camel'
+      assign hex = '#a89c8c'
+    when 'sand'
+      assign hex = '#c6b9a5'
+    when 'cream'
+      assign hex = '#f2ead9'
+    when 'bone'
+      assign hex = '#e8e2d5'
+    when 'ecru'
+      assign hex = '#d8cfbc'
+    when 'taupe'
+      assign hex = '#b0a396'
+    when 'mushroom'
+      assign hex = '#a89e93'
+    when 'charcoal'
+      assign hex = '#36393b'
+    when 'slate'
+      assign hex = '#5a6470'
+    when 'rust'
+      assign hex = '#a1512c'
+    when 'terracotta'
+      assign hex = '#b5613f'
+    when 'mustard'
+      assign hex = '#c9a227'
+    when 'forest'
+      assign hex = '#2f4131'
+    when 'moss'
+      assign hex = '#6b7355'
+    when 'wine'
+      assign hex = '#5c2233'
+    when 'blush'
+      assign hex = '#e5c3bd'
+    when 'natural', 'undyed', 'raw'
+      assign hex = '#e7dfd2'
+    when 'offwhite', 'antiquewhite'
+      assign hex = '#f2efe8'
+    when 'midnight'
+      assign hex = '#1f2333'
+    when 'denim'
+      assign hex = '#4a6180'
+  endcase
+
+  comment
+    Already a real value, or a genuine CSS keyword: pass it through.
+  endcomment
+  if hex == blank
+    assign first_char = name | strip | slice: 0
+    if first_char == '#'
+      assign hex = name | strip
+    else
+      assign keywords = 'black,white,red,green,blue,yellow,orange,purple,pink,brown,grey,gray,beige,tan,navy,teal,maroon,olive,silver,gold,ivory,khaki,lavender,salmon,coral,turquoise,violet,indigo,crimson,plum,tomato,wheat,linen,snow,azure,aqua,lime,magenta,cyan,peru,sienna,chocolate,darkgreen,darkblue,darkred,lightblue,lightgreen,lightgrey,lightgray'
+      assign keyword_list = keywords | split: ','
+      if keyword_list contains key
+        assign hex = key
+      endif
+    endif
+  endif
+
+  echo hex
+-%}

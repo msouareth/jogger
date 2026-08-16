@@ -1,0 +1,382 @@
+{%- liquid
+  assign logo_text = section.settings.logo_text | default: shop.name
+  assign menu = section.settings.menu
+  assign tagline = section.settings.logo_tagline
+-%}
+
+{%- comment -%}
+  The default guards against a stored header whose settings predate this one.
+  An empty value would emit "--hdr-gap: px", and an invalid custom property
+  makes the whole gap declaration compute to its initial value — the spacing
+  would collapse and the control would appear to do nothing at all.
+{%- endcomment -%}
+<header class="hdr" id="SiteHeader" style="--hdr-gap: {{ section.settings.logo_gap | default: 88 }}px;">
+  {%- comment -%}
+    Three columns: menu, wordmark, tools. The side columns are equal so the
+    wordmark sits on the true centre of the bar; the menu holds the left edge
+    and the icons the right. Source order matches the visual order left to
+    right, which keeps tab order honest.
+  {%- endcomment -%}
+  <div class="hside hside--left">
+    <button
+      type="button"
+      class="menu-toggle"
+      data-drawer-open="NavDrawer"
+      aria-label="{{ 'general.open_menu' | t }}"
+      aria-controls="NavDrawer"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="hnav" aria-label="{{ 'general.menu' | t }}">
+      <ul>
+        {%- for link in menu.links -%}
+          <li>
+            <a href="{{ link.url }}" {% if link.active or link.child_active %}aria-current="page"{% endif %}>
+              {{- link.title | escape -}}
+              {%- if link.links.size > 0 -%}
+                <span class="caret">{% render 'icon', name: 'caret' %}</span>
+              {%- endif -%}
+            </a>
+            {%- if link.links.size > 0 -%}
+              <div class="sub">
+                {%- for child in link.links -%}
+                  <a href="{{ child.url }}">{{ child.title | escape }}</a>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  </div>
+
+  {%- comment -%}
+    Image or wordmark is an explicit choice rather than "an image if one was
+    uploaded". A merchant trying a logo out and then wanting the wordmark back
+    should not have to delete the file to get there.
+
+    The type overrides go through the same text-style snippet every other
+    section uses, so the wordmark answers to the same three controls — font,
+    size, colour — as every other piece of type in the theme. Size arrives as
+    --ts, a multiplier, which scales the tagline with the mark rather than
+    pinning either to a pixel value.
+  {%- endcomment -%}
+  {%- liquid
+    assign use_image = false
+    if section.settings.logo_type == 'image' and section.settings.logo != blank
+      assign use_image = true
+    endif
+  -%}
+  {%- capture logo_type_style -%}
+    {% render 'text-style', s: section.settings, key: 'logo' %}
+  {%- endcapture -%}
+
+  {%- capture logo_mark -%}
+    <a href="{{ routes.root_url }}" class="logo" style="--logo-width: {{ section.settings.logo_width }}px;{{ logo_type_style }}">
+      {%- if use_image -%}
+        <img
+          src="{{ section.settings.logo | image_url: width: 400 }}"
+          alt="{{ shop.name | escape }}"
+          width="{{ section.settings.logo.width }}"
+          height="{{ section.settings.logo.height }}"
+        >
+      {%- else -%}
+        <span class="logo-mark">
+          {{- logo_text | escape }}<b>{{ section.settings.logo_text_light | escape }}</b>
+        </span>
+      {%- endif -%}
+      {%- comment -%}
+        The tagline sits under the mark for an image logo too — a merchant with
+        a logotype but no strapline baked into it still wants the line.
+      {%- endcomment -%}
+      {%- if tagline != blank -%}
+        <span class="logo-tag">{{ tagline | escape }}</span>
+      {%- endif -%}
+    </a>
+  {%- endcapture -%}
+
+  {%- comment -%}
+    The wordmark is the page's h1 on the home page only; every other
+    template has a heading of its own.
+  {%- endcomment -%}
+  {%- if request.page_type == 'index' -%}
+    <h1 style="margin: 0; display: contents;">{{ logo_mark }}</h1>
+  {%- else -%}
+    {{ logo_mark }}
+  {%- endif -%}
+
+  <div class="hside hside--right">
+    {%- comment -%}
+      The tools read as icons, so each carries its label in a visually hidden
+      span rather than a title attribute — a title is not reliably announced
+      and never reaches a keyboard-only user.
+    {%- endcomment -%}
+    <div class="htools">
+      {%- if section.settings.show_account and shop.customer_accounts_enabled -%}
+        <a href="{{ routes.account_url }}" class="hicon htool-account">
+          {% render 'icon', name: 'account' %}
+          <span class="visually-hidden">{{ 'sections.header.account' | t }}</span>
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.show_search -%}
+        <button type="button" class="hicon" data-search-open aria-controls="SearchPanel">
+          {% render 'icon', name: 'search' %}
+          <span class="visually-hidden">{{ 'sections.header.search' | t }}</span>
+        </button>
+      {%- endif -%}
+
+      {%- if settings.cart_type == 'drawer' -%}
+        <button type="button" class="hicon hicon--bag" data-drawer-open="CartDrawer" aria-controls="CartDrawer">
+          {% render 'icon', name: 'bag' %}
+          {%- if cart.item_count > 0 -%}
+            <span class="bag-n" aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">
+            {{ 'sections.header.bag' | t }} — {{ 'sections.header.bag_count' | t: count: cart.item_count }}
+          </span>
+        </button>
+      {%- else -%}
+        <a href="{{ routes.cart_url }}" class="hicon hicon--bag">
+          {% render 'icon', name: 'bag' %}
+          {%- if cart.item_count > 0 -%}
+            <span class="bag-n" aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">
+            {{ 'sections.header.bag' | t }} — {{ 'sections.header.bag_count' | t: count: cart.item_count }}
+          </span>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+{%- comment -%} Mobile navigation {%- endcomment -%}
+<nav class="nav-drawer" id="NavDrawer" aria-label="{{ 'general.menu' | t }}" aria-hidden="true">
+  <header>
+    <h2>{{ 'general.menu' | t }}</h2>
+    <button type="button" data-drawer-close>{{ 'general.close' | t }}</button>
+  </header>
+
+  <ul>
+    {%- for link in menu.links -%}
+      <li>
+        <a href="{{ link.url }}">{{ link.title | escape }}</a>
+        {%- if link.links.size > 0 -%}
+          <div class="sub">
+            {%- for child in link.links -%}
+              <a href="{{ child.url }}">{{ child.title | escape }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  {%- comment -%}
+    On a phone the bar has no room for the menu and the tools at once, so the
+    tools come in here and sit with the links as one list — search, account and
+    bag as words rather than marks, since there is space to name them and a
+    label is quicker to read than an icon.
+
+    Opening search or the bag from in here needs no special handling: both
+    triggers close whatever drawer is open before they act.
+  {%- endcomment -%}
+  <ul class="nav-drawer-tools">
+    {%- if section.settings.show_search -%}
+      <li>
+        <button type="button" data-search-open aria-controls="SearchPanel">
+          {% render 'icon', name: 'search' %}
+          {{ 'sections.header.search' | t }}
+        </button>
+      </li>
+    {%- endif -%}
+
+    {%- if section.settings.show_account and shop.customer_accounts_enabled -%}
+      <li>
+        <a href="{{ routes.account_url }}">
+          {% render 'icon', name: 'account' %}
+          {{ 'sections.header.account' | t }}
+        </a>
+      </li>
+    {%- endif -%}
+
+    <li>
+      {%- if settings.cart_type == 'drawer' -%}
+        <button type="button" data-drawer-open="CartDrawer" aria-controls="CartDrawer">
+          {% render 'icon', name: 'bag' %}
+          {{ 'sections.header.bag' | t }}
+          {%- if cart.item_count > 0 -%}
+            <span class="bag-n" aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">
+            {{ 'sections.header.bag_count' | t: count: cart.item_count }}
+          </span>
+        </button>
+      {%- else -%}
+        <a href="{{ routes.cart_url }}">
+          {% render 'icon', name: 'bag' %}
+          {{ 'sections.header.bag' | t }}
+          {%- if cart.item_count > 0 -%}
+            <span class="bag-n" aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">
+            {{ 'sections.header.bag_count' | t: count: cart.item_count }}
+          </span>
+        </a>
+      {%- endif -%}
+    </li>
+  </ul>
+</nav>
+
+{%- if section.settings.show_search -%}
+  <div class="search-panel" id="SearchPanel" aria-hidden="true">
+    {%- if settings.predictive_search_enabled -%}<predictive-search>{%- endif -%}
+      <form action="{{ routes.search_url }}" method="get" role="search">
+        <label for="SearchInput" class="visually-hidden">{{ 'general.search.title' | t }}</label>
+        <input
+          type="search"
+          id="SearchInput"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+          autocomplete="off"
+          {% if settings.predictive_search_enabled %}
+            role="combobox" aria-expanded="false" aria-autocomplete="list"
+          {% endif %}
+        >
+        <button type="button" data-drawer-close aria-label="{{ 'general.search.close' | t }}">
+          {% render 'icon', name: 'close' %}
+        </button>
+      </form>
+
+      {%- if settings.predictive_search_enabled -%}
+        <div class="predictive" data-predictive-results></div>
+      {%- endif -%}
+    {%- if settings.predictive_search_enabled -%}</predictive-search>{%- endif -%}
+  </div>
+{%- endif -%}
+
+<button type="button" class="scrim" id="Scrim" tabindex="-1" aria-hidden="true"></button>
+
+{% schema %}
+{
+  "name": "Header",
+  "tag": "section",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "select",
+      "id": "logo_type",
+      "label": "Logo",
+      "options": [
+        { "value": "text", "label": "Wordmark (text)" },
+        { "value": "image", "label": "Image" }
+      ],
+      "default": "image",
+      "info": "Image falls back to the wordmark when no file is set, so the header is never blank. That fallback is also why Image is the default — a store that already had a logo uploaded keeps showing it after an update rather than reverting to text."
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "info": "Applies to the image only.",
+      "min": 60,
+      "max": 260,
+      "step": 5,
+      "unit": "px",
+      "default": 110
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Wordmark",
+      "info": "Defaults to your store name."
+    },
+    {
+      "type": "text",
+      "id": "logo_text_light",
+      "label": "Wordmark tail",
+      "info": "Joined to the wordmark above and set in the same weight. Leave it empty unless you are splitting the name across two fields."
+    },
+    {
+      "type": "text",
+      "id": "logo_tagline",
+      "label": "Tagline",
+      "info": "A short line under the wordmark, set small and letterspaced — 'Skin care', 'Est. 1998'. Two or three words at most; it is not a place for a sentence."
+    },
+    {
+      "type": "header",
+      "content": "Wordmark type"
+    },
+    {
+      "type": "select",
+      "id": "logo_font",
+      "label": "Font",
+      "info": "The three fonts themselves are set in Theme settings, so the wordmark stays part of the same type system as the rest of the theme.",
+      "options": [
+        { "value": "default", "label": "Default" },
+        { "value": "heading", "label": "Heading font" },
+        { "value": "body", "label": "Body font" },
+        { "value": "accent", "label": "Accent font" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "logo_size",
+      "label": "Size",
+      "info": "Scales the wordmark and its tagline together, and stays responsive rather than pinning them to one pixel size.",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "logo_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "range",
+      "id": "logo_gap",
+      "label": "Space around wordmark",
+      "info": "The air between the wordmark and the menu and icons either side of it, in pixels, exactly as set. Narrow screens ease it back so the icons never crowd the wordmark. A wide setting leaves the menu less room, so a long menu folds into the drawer sooner — at the top of this range expect the drawer on most screens.",
+      "min": 24,
+      "max": 300,
+      "step": 4,
+      "unit": "px",
+      "default": 88
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account link",
+      "default": true
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  }
+}
+{% endschema %}

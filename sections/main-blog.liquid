@@ -1,0 +1,60 @@
+<div class="wrap">
+  <div class="chead">
+    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+    <h1 class="dsp">{{ blog.title | escape }}</h1>
+  </div>
+
+  {%- paginate blog.articles by section.settings.per_page -%}
+    <div class="bgrid">
+      {%- for article in blog.articles -%}
+        <a class="bcard rv" style="--i: {{ forloop.index0 | modulo: 3 }};" href="{{ article.url }}">
+          <span class="fr">
+            {% render 'media',
+              image: article.image,
+              ratio: '4 / 3',
+              sizes: '(min-width: 900px) 33vw, 100vw',
+              placeholder: 'image'
+            %}
+          </span>
+          <span>
+            {%- if section.settings.show_date -%}
+              <span class="article-meta">{{ article.published_at | date: format: 'date' }}</span>
+            {%- endif -%}
+            <h3>{{ article.title | escape }}</h3>
+            {%- if section.settings.show_excerpt -%}
+              <p>{{ article.excerpt_or_content | strip_html | truncatewords: 24 }}</p>
+            {%- endif -%}
+          </span>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {% render 'pagination', paginate: paginate %}
+  {%- endpaginate -%}
+
+  <div style="height: clamp(56px, 8vw, 100px);"></div>
+</div>
+
+{% schema %}
+{
+  "name": "Blog",
+  "tag": "section",
+  "class": "section-blog",
+  "settings": [
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_excerpt", "label": "Show excerpt", "default": true },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Articles per page",
+      "min": 6,
+      "max": 24,
+      "step": 3,
+      "default": 12
+    }
+  ],
+  "enabled_on": {
+    "templates": ["blog"]
+  }
+}
+{% endschema %}

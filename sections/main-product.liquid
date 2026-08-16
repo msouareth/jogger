@@ -1,0 +1,1028 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign form_id = 'ProductForm-' | append: section.id
+  assign collapsible_seen = false
+
+  assign crumb_collection = collection
+  if crumb_collection == blank
+    assign crumb_collection = product.collections.first
+  endif
+
+  assign is_gallery = false
+  if section.settings.media_layout == 'gallery'
+    assign is_gallery = true
+  endif
+
+  assign shell_class = ''
+  if is_gallery and section.settings.info_card
+    assign shell_class = ' pdp-shell--surface'
+  endif
+
+  comment
+    The stage is capped against the viewport height, so its width has to be
+    capped to match or the box keeps the full column width and the image
+    letterboxes inside it — which reads as a huge gap before the details.
+    The media column is therefore sized from the ratio rather than taking
+    1fr, and that needs the ratio as a plain number as well as a CSS value.
+  endcomment
+  case section.settings.stage_ratio
+    when '4 / 5'
+      assign stage_ar = 0.8
+    when '3 / 4'
+      assign stage_ar = 0.75
+    when '4 / 3'
+      assign stage_ar = 1.334
+    else
+      assign stage_ar = 1
+  endcase
+
+  assign thumb_rail = 0
+  if section.settings.show_thumbnails and product.media.size > 1
+    unless section.settings.thumb_position == 'below'
+      assign thumb_rail = 84
+    endunless
+  endif
+
+-%}
+
+<div class="scheme color-{{ section.settings.color_scheme }}{{ shell_class }}">
+<div class="wrap">
+  <div
+    class="pdp{% if is_gallery %} pdp--gallery{% endif %}"
+    {% if is_gallery %}
+      style="
+        --stage-ratio: {{ section.settings.stage_ratio }};
+        --stage-pad: {{ section.settings.stage_padding }}px;
+        --stage-fit: {{ section.settings.stage_fit }};
+        --stage-max: {{ section.settings.stage_max_height }}vh;
+        --stage-ar: {{ stage_ar }};
+        --thumb-rail: {{ thumb_rail }}px;
+      "
+    {% endif %}
+  >
+    {%- if is_gallery -%}
+      {%- comment -%}
+        One stage, many slides. Only the active slide is visible; the
+        thumbnails and the variant picker both drive it through
+        product.js, so choosing a colour moves the gallery.
+      {%- endcomment -%}
+      {%- comment -%}
+        The stage variables live on .pdp above so the grid can size its
+        media column from them; they inherit down to here.
+      {%- endcomment -%}
+      <div class="gallery gallery--thumbs-{{ section.settings.thumb_position }}" data-gallery>
+        <div class="gallery-stage">
+          {%- if product.media.size > 0 -%}
+            {%- for media in product.media -%}
+              <div
+                class="gallery-slide"
+                data-slide="{{ forloop.index0 }}"
+                data-media-id="{{ media.id }}"
+                {% if forloop.first %}data-active{% endif %}
+              >
+                {%- case media.media_type -%}
+                  {%- when 'image' -%}
+                    {% render 'media',
+                      image: media,
+                      sizes: '(min-width: 900px) 62vw, 100vw',
+                      loading: 'eager',
+                      placeholder: 'product-1'
+                    %}
+                  {%- when 'video' -%}
+                    <div class="media media--video">
+                      {{ media | video_tag: controls: true, muted: true, playsinline: true }}
+                    </div>
+                  {%- when 'external_video' -%}
+                    <div class="media media--video">{{ media | external_video_tag }}</div>
+                  {%- else -%}
+                    {% render 'media', image: media.preview_image, sizes: '62vw', placeholder: 'product-1' %}
+                {%- endcase -%}
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <div class="gallery-slide" data-slide="0" data-active>
+              {% render 'media', placeholder: 'product-1' %}
+            </div>
+          {%- endif -%}
+
+          {%- if product.media.size > 1 -%}
+            <button type="button" class="gallery-nav prev" data-gallery-prev aria-label="{{ 'accessibility.previous' | t }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <button type="button" class="gallery-nav next" data-gallery-next aria-label="{{ 'accessibility.next' | t }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 and section.settings.show_thumbnails -%}
+          <div class="gallery-thumbs" role="list">
+            {%- for media in product.media -%}
+              <button
+                type="button"
+                class="gallery-thumb"
+                role="listitem"
+                data-gallery-thumb="{{ forloop.index0 }}"
+                {% if forloop.first %}data-active aria-current="true"{% endif %}
+                aria-label="{{ 'products.product.media.image_available' | t: index: forloop.index }}"
+              >
+                {% render 'media', image: media.preview_image, sizes: '84px', placeholder: 'product-1' %}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <div class="pdp-shots">
+        {%- if product.media.size > 0 -%}
+          {%- for media in product.media -%}
+            {%- liquid
+              assign is_wide = false
+              assign position = forloop.index | modulo: 3
+              if position == 0
+                assign is_wide = true
+              endif
+
+              assign shot_sizes = '(min-width: 900px) 29vw, 50vw'
+              if is_wide
+                assign shot_sizes = '(min-width: 900px) 58vw, 100vw'
+              endif
+
+              assign load = 'lazy'
+              if forloop.index <= 2
+                assign load = 'eager'
+              endif
+            -%}
+
+            <div class="shot{% if is_wide %} wide{% endif %}" data-media-id="{{ media.id }}">
+              {%- case media.media_type -%}
+                {%- when 'image' -%}
+                  {% render 'media',
+                    image: media,
+                    sizes: shot_sizes,
+                    loading: load,
+                    placeholder: 'product-1'
+                  %}
+
+                {%- when 'video' -%}
+                  <div class="media media--video" style="aspect-ratio: {% if is_wide %}16 / 10{% else %}3 / 4{% endif %};">
+                    {{ media | video_tag: controls: true, muted: true, playsinline: true }}
+                  </div>
+
+                {%- when 'external_video' -%}
+                  <div class="media media--video" style="aspect-ratio: {% if is_wide %}16 / 10{% else %}3 / 4{% endif %};">
+                    {{ media | external_video_tag }}
+                  </div>
+
+                {%- else -%}
+                  {% render 'media', image: media.preview_image, sizes: shot_sizes, placeholder: 'product-1' %}
+              {%- endcase -%}
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          <div class="shot">{% render 'media', ratio: '3 / 4', placeholder: 'product-1' %}</div>
+          <div class="shot">{% render 'media', ratio: '3 / 4', placeholder: 'product-2' %}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div
+      class="
+        pdp-info
+        {%- if section.settings.info_card %} pdp-card{% endif -%}
+        {%- if section.settings.card_center %} center{% endif -%}
+        {%- if section.settings.density == 'compact' %} compact{% endif -%}
+        {%- if section.settings.button_shape == 'square' %} sq{% endif -%}
+      "
+    >
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'title' -%}
+            <div {{ block.shopify_attributes }}>
+              {%- if block.settings.show_breadcrumb -%}
+                <p class="crumb">
+                  <a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a>
+                  {%- if crumb_collection != blank -%}
+                    &nbsp;/&nbsp;<a href="{{ crumb_collection.url }}">{{ crumb_collection.title | escape }}</a>
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+              <h1{% if block.settings.uppercase %} class="upper"{% endif %}>{{ product.title | escape }}</h1>
+
+              {%- if block.settings.show_subtitle -%}
+                {%- liquid
+                  assign subtitle = product.type
+                  if block.settings.subtitle_source == 'vendor'
+                    assign subtitle = product.vendor
+                  endif
+                -%}
+                {%- if subtitle != blank -%}
+                  <p class="pdp-subtitle">{{ subtitle | escape }}</p>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+
+          {%- when 'price' -%}
+            <div data-variant-part="price" {{ block.shopify_attributes }}>
+              <p class="pdp-price">
+                {% render 'price', variant: current_variant %}
+                {%- if current_variant.compare_at_price > current_variant.price -%}
+                  <span class="badge">{{ 'products.product.on_sale' | t }}</span>
+                {%- endif -%}
+              </p>
+              {%- if current_variant.unit_price_measurement -%}
+                <p class="pdp-unit">
+                  {{ current_variant.unit_price | money }}/{{ current_variant.unit_price_measurement.reference_value }}{{ current_variant.unit_price_measurement.reference_unit }}
+                </p>
+              {%- endif -%}
+            </div>
+
+          {%- when 'description' -%}
+            {%- if product.description != blank -%}
+              <div class="pdp-desc rte" {{ block.shopify_attributes }}>{{ product.description }}</div>
+            {%- endif -%}
+
+          {%- when 'variant_picker' -%}
+            {%- unless product.has_only_default_variant -%}
+              <variant-picker
+                data-section="{{ section.id }}"
+                data-url="{{ product.url }}"
+                data-update-url="{{ block.settings.update_url }}"
+                {{ block.shopify_attributes }}
+              >
+                <script type="application/json" data-variant-json>
+                  {{- product.variants | json -}}
+                </script>
+
+                {%- for option in product.options_with_values -%}
+                  {%- liquid
+                    assign has_swatches = false
+                    for value in option.values
+                      if value.swatch
+                        assign has_swatches = true
+                        break
+                      endif
+                    endfor
+
+                    assign option_name = option.name | downcase
+                    assign is_colour = false
+                    if option_name contains 'colour' or option_name contains 'color'
+                      assign is_colour = true
+                    endif
+
+                    assign style = 'pills'
+                    if has_swatches or is_colour
+                      assign style = 'swatches'
+                    elsif option.values.size > 10
+                      assign style = 'select'
+                    endif
+
+                    assign group_name = 'option-' | append: section.id | append: '-' | append: option.position
+                  -%}
+
+                  <div class="opt" data-option-group data-option-position="{{ option.position }}">
+                    <div class="ol">
+                      <span>{{ option.name | escape }}</span>
+                      {%- if style == 'swatches' -%}
+                        <em data-option-value-label>{{ option.selected_value | escape }}</em>
+                      {%- elsif block.settings.size_guide != blank and forloop.last -%}
+                        <a href="{{ block.settings.size_guide }}">{{ 'products.product.size_guide' | t }}</a>
+                      {%- endif -%}
+                    </div>
+
+                    {%- if style == 'select' -%}
+                      <label class="visually-hidden" for="Option-{{ section.id }}-{{ option.position }}">
+                        {{ option.name | escape }}
+                      </label>
+                      <select
+                        class="opt-select"
+                        id="Option-{{ section.id }}-{{ option.position }}"
+                        data-option-position="{{ option.position }}"
+                      >
+                        {%- for value in option.values -%}
+                          {%- assign value_name = value.name | default: value -%}
+                          <option value="{{ value_name | escape }}" {% if value_name == option.selected_value %}selected{% endif %}>
+                            {{ value_name | escape }}
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                    {%- else -%}
+                      <div class="
+                        {%- if style == 'swatches' %}sws
+                        {%- else %}sizes sizes--{{ section.settings.size_style }}
+                        {%- endif -%}
+                      ">
+                        {%- for value in option.values -%}
+                          {%- liquid
+                            assign value_name = value.name | default: value
+                            assign input_id = 'opt-' | append: section.id | append: '-' | append: option.position | append: '-' | append: forloop.index
+
+                            comment
+                              Image swatches show the garment in that colour rather
+                              than a flat chip. Find the first variant carrying this
+                              value that has its own photo; fall back to the admin
+                              swatch, then to reading the value name as a colour.
+                            endcomment
+                            assign swatch_image = blank
+                            if style == 'swatches' and section.settings.swatch_style == 'image'
+                              for variant in product.variants
+                                assign candidate = variant.options[option.position0]
+                                if candidate == value_name and variant.featured_media
+                                  assign swatch_image = variant.featured_media.preview_image
+                                  break
+                                endif
+                              endfor
+                            endif
+                          -%}
+                          <label for="{{ input_id }}">
+                            <input
+                              type="radio"
+                              id="{{ input_id }}"
+                              name="{{ group_name }}"
+                              value="{{ value_name | escape }}"
+                              data-option-position="{{ option.position }}"
+                              {% if value_name == option.selected_value %}checked{% endif %}
+                            >
+                            {%- if style == 'swatches' -%}
+                              {%- if swatch_image != blank -%}
+                                <span
+                                  class="sw sw--image"
+                                  style="background-image: url({{ swatch_image | image_url: width: 160 }});"
+                                ></span>
+                              {%- elsif value.swatch.image -%}
+                                <span
+                                  class="sw"
+                                  style="background-image: url({{ value.swatch.image | image_url: width: 80 }});"
+                                ></span>
+                              {%- else -%}
+                                {%- capture fallback_color -%}
+                                  {%- render 'swatch-color', name: value_name -%}
+                                {%- endcapture -%}
+                                {%- assign chip = value.swatch.color | default: fallback_color -%}
+                                <span
+                                  class="sw{% if chip == blank %} sw--unset{% endif %}"
+                                  {% if chip != blank %}style="background-color: {{ chip | escape }};"{% endif %}
+                                ></span>
+                              {%- endif -%}
+                              <span class="visually-hidden">{{ value_name | escape }}</span>
+                            {%- else -%}
+                              <span class="size">{{ value_name | escape }}</span>
+                            {%- endif -%}
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                {%- endfor -%}
+              </variant-picker>
+            {%- endunless -%}
+
+          {%- when 'buy_buttons' -%}
+            <div {{ block.shopify_attributes }}>
+              {%- form 'product',
+                product,
+                id: form_id,
+                novalidate: 'novalidate',
+                data-product-form: 'true'
+              -%}
+                <input
+                  type="hidden"
+                  name="id"
+                  data-variant-id
+                  value="{{ current_variant.id }}"
+                  {% unless current_variant.available %}disabled{% endunless %}
+                >
+
+                {%- liquid
+                  assign inline_qty = false
+                  if block.settings.show_quantity and block.settings.buy_layout == 'inline'
+                    assign inline_qty = true
+                  endif
+                -%}
+
+                {%- capture quantity_field -%}
+                  <div class="qty">
+                    <button type="button" data-qty-step="-1" aria-label="{{ 'products.product.decrease' | t }}">
+                      {% render 'icon', name: 'minus' %}
+                    </button>
+                    <input
+                      type="number"
+                      name="quantity"
+                      value="1"
+                      min="1"
+                      aria-label="{{ 'products.product.quantity' | t }}"
+                    >
+                    <button type="button" data-qty-step="1" aria-label="{{ 'products.product.increase' | t }}">
+                      {% render 'icon', name: 'plus' %}
+                    </button>
+                  </div>
+                {%- endcapture -%}
+
+                {%- if block.settings.show_quantity and inline_qty == false -%}
+                  <div class="opt">
+                    <div class="ol"><span>{{ 'products.product.quantity' | t }}</span></div>
+                    {{ quantity_field }}
+                  </div>
+                {%- elsif block.settings.show_quantity == false -%}
+                  <input type="hidden" name="quantity" value="1">
+                {%- endif -%}
+
+                <div class="addrow{% if inline_qty %} addrow--inline{% endif %}">
+                  {%- if inline_qty -%}
+                    <label class="visually-hidden" for="Quantity-{{ section.id }}">
+                      {{- 'products.product.quantity' | t -}}
+                    </label>
+                    {{ quantity_field }}
+                  {%- endif -%}
+
+                  {%- capture add_colors -%}
+                    {%- render 'button-style', s: section.settings, key: 'add' -%}
+                  {%- endcapture -%}
+                  <button
+                    type="submit"
+                    class="b b-solid{% if section.settings.info_card %} b-block{% endif %}"
+                    data-add-button
+                    style="{{ add_colors }}"
+                    {% unless current_variant.available %}disabled{% endunless %}
+                  >
+                    <span data-add-text>
+                      {%- if current_variant.available -%}
+                        {{ 'products.product.add_to_bag' | t }}
+                      {%- else -%}
+                        {{ 'products.product.sold_out' | t }}
+                      {%- endif -%}
+                    </span>
+                    {%- comment -%}
+                      The card layout puts the price above the button, so
+                      repeating it inside would just be noise.
+                    {%- endcomment -%}
+                    {%- unless section.settings.info_card -%}
+                      <span data-variant-part="add-price">{{ current_variant.price | money }}</span>
+                    {%- endunless -%}
+                  </button>
+
+                  {%- if block.settings.show_save -%}
+                    <button
+                      type="button"
+                      class="iconb"
+                      data-wish="{{ product.handle }}"
+                      aria-label="{{ 'products.product.save' | t: title: product.title }}"
+                    >
+                      {% render 'icon', name: 'heart' %}
+                    </button>
+                  {%- endif -%}
+                </div>
+
+                {%- if block.settings.show_dynamic_checkout -%}
+                  {%- capture buynow_colors -%}
+                    {%- render 'button-style', s: section.settings, key: 'buynow' -%}
+                  {%- endcapture -%}
+                  <div class="pdp-payment" style="{{ buynow_colors }}">{{ form | payment_button }}</div>
+                {%- endif -%}
+              {%- endform -%}
+            </div>
+
+          {%- when 'inventory' -%}
+            <div data-variant-part="inventory" {{ block.shopify_attributes }}>
+              {%- liquid
+                comment
+                  Each statement in a liquid tag must sit on its own line, so
+                  the low-stock test is nested rather than chained.
+                endcomment
+                assign low_threshold = block.settings.low_stock_threshold
+                assign show_low = false
+                if current_variant.available and current_variant.inventory_management != blank
+                  if current_variant.inventory_policy == 'deny' and current_variant.inventory_quantity > 0
+                    if current_variant.inventory_quantity <= low_threshold
+                      assign show_low = true
+                    endif
+                  endif
+                endif
+              -%}
+              {%- if current_variant.available -%}
+                <p class="ship">
+                  <i></i>
+                  {%- if show_low -%}
+                    {{ 'products.product.low_stock' | t: count: current_variant.inventory_quantity }}
+                  {%- else -%}
+                    {{ 'products.product.in_stock' | t }}
+                  {%- endif -%}
+                  {%- if block.settings.note != blank -%}
+                    &nbsp;&mdash;&nbsp;{{ block.settings.note | escape }}
+                  {%- endif -%}
+                </p>
+              {%- else -%}
+                <p class="ship out"><i></i>{{ 'products.product.out_of_stock' | t }}</p>
+              {%- endif -%}
+            </div>
+
+          {%- when 'collapsible' -%}
+            <div class="acc{% unless collapsible_seen %} acc--first{% endunless %}" {{ block.shopify_attributes }}>
+              <details {% if block.settings.open %}open{% endif %}>
+                <summary>{{ block.settings.heading | escape }}</summary>
+                <div class="in rte">{{ block.settings.body }}</div>
+              </details>
+            </div>
+            {%- assign collapsible_seen = true -%}
+
+          {%- when 'text' -%}
+            <div class="body" style="margin-top: 20px;" {{ block.shopify_attributes }}>
+              {{ block.settings.body }}
+            </div>
+
+          {%- when 'links' -%}
+            <div class="pdp-links" {{ block.shopify_attributes }}>
+              {%- comment -%}
+                A label with no link renders as plain text rather than an
+                anchor to '#', which would silently jump to the top.
+              {%- endcomment -%}
+              {%- if block.settings.link_1_label != blank -%}
+                {%- if block.settings.link_1_url != blank -%}
+                  <a href="{{ block.settings.link_1_url }}">{{ block.settings.link_1_label | escape }}</a>
+                {%- else -%}
+                  <span>{{ block.settings.link_1_label | escape }}</span>
+                {%- endif -%}
+              {%- endif -%}
+              {%- if block.settings.link_2_label != blank -%}
+                {%- if block.settings.link_2_url != blank -%}
+                  <a href="{{ block.settings.link_2_url }}">{{ block.settings.link_2_label | escape }}</a>
+                {%- else -%}
+                  <span>{{ block.settings.link_2_label | escape }}</span>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+
+          {%- when '@app' -%}
+            {% render block %}
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+</div>
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "section-product",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_layout",
+      "label": "Media layout",
+      "options": [
+        {
+          "value": "gallery",
+          "label": "Gallery — one large image with thumbnails"
+        },
+        {
+          "value": "grid",
+          "label": "Grid — all images stacked two-up"
+        }
+      ],
+      "default": "gallery"
+    },
+    {
+      "type": "select",
+      "id": "stage_ratio",
+      "label": "Image shape",
+      "options": [
+        {
+          "value": "1 / 1",
+          "label": "Square"
+        },
+        {
+          "value": "4 / 5",
+          "label": "Portrait"
+        },
+        {
+          "value": "3 / 4",
+          "label": "Tall portrait"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Landscape"
+        }
+      ],
+      "info": "Gallery layout only.",
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "stage_fit",
+      "label": "Image fit",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Fill the frame"
+        },
+        {
+          "value": "contain",
+          "label": "Fit the whole photo in"
+        }
+      ],
+      "info": "Fill crops to the frame's shape. Fit shows the whole photo, leaving space at the sides when its shape differs from the frame — set the image shape to match your photography to avoid that.",
+      "default": "cover"
+    },
+    {
+      "type": "range",
+      "id": "stage_padding",
+      "label": "Space around the image",
+      "info": "Gallery layout only. Room to breathe around cut-out product shots. Leave at 0 for full-bleed photography.",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "stage_max_height",
+      "label": "Maximum image height",
+      "info": "Gallery layout only. Caps the image against the screen height so the buy controls stay in view without scrolling.",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 75
+    },
+    {
+      "type": "checkbox",
+      "id": "show_thumbnails",
+      "label": "Show thumbnails",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "thumb_position",
+      "label": "Thumbnail position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left of the image"
+        },
+        {
+          "value": "right",
+          "label": "Right of the image"
+        },
+        {
+          "value": "below",
+          "label": "Below the image"
+        }
+      ],
+      "info": "Gallery layout only. Thumbnails always drop below the image on phones.",
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Product details"
+    },
+    {
+      "type": "select",
+      "id": "density",
+      "label": "Spacing",
+      "options": [
+        {
+          "value": "compact",
+          "label": "Compact — fits above the fold"
+        },
+        {
+          "value": "comfortable",
+          "label": "Comfortable — more air"
+        }
+      ],
+      "default": "compact"
+    },
+    {
+      "type": "checkbox",
+      "id": "info_card",
+      "label": "Float the details in a card",
+      "info": "Puts the buy controls on a raised panel over a tinted ground.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "card_center",
+      "label": "Centre the details",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "size_style",
+      "label": "Size buttons",
+      "options": [
+        {
+          "value": "underline",
+          "label": "Underlined text"
+        },
+        {
+          "value": "box",
+          "label": "Square boxes"
+        },
+        {
+          "value": "pill",
+          "label": "Rounded pills"
+        }
+      ],
+      "default": "underline"
+    },
+    {
+      "type": "select",
+      "id": "button_shape",
+      "label": "Button shape",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "pill",
+          "label": "Rounded"
+        }
+      ],
+      "info": "Applies to the add to bag row on this page.",
+      "default": "square"
+    },
+    {
+      "type": "select",
+      "id": "swatch_style",
+      "label": "Colour swatches",
+      "options": [
+        {
+          "value": "image",
+          "label": "Product photo"
+        },
+        {
+          "value": "colour",
+          "label": "Flat colour"
+        }
+      ],
+      "info": "Photo swatches use each colour's own variant image where one is set.",
+      "default": "image"
+    },
+    {
+      "type": "header",
+      "content": "Add to bag colours"
+    },
+    {
+      "type": "color",
+      "id": "add_bg",
+      "label": "Fill",
+      "info": "Leave empty to follow the colour scheme. On outline and underline buttons this is the line colour."
+    },
+    {
+      "type": "color",
+      "id": "add_fg",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "add_hover",
+      "label": "On hover"
+    },
+    {
+      "type": "header",
+      "content": "Buy it now colours"
+    },
+    {
+      "type": "color",
+      "id": "buynow_bg",
+      "label": "Fill",
+      "info": "Applies to the plain \"Buy it now\" button. The branded Shop Pay button keeps Shopify's own colour and cannot be restyled."
+    },
+    {
+      "type": "color",
+      "id": "buynow_fg",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "buynow_hover",
+      "label": "On hover"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_breadcrumb",
+          "label": "Show breadcrumb",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "uppercase",
+          "label": "Uppercase title",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_subtitle",
+          "label": "Show subtitle",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "subtitle_source",
+          "label": "Subtitle",
+          "options": [
+            {
+              "value": "type",
+              "label": "Product type"
+            },
+            {
+              "value": "vendor",
+              "label": "Vendor"
+            }
+          ],
+          "default": "type"
+        }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "update_url",
+          "label": "Update the address bar on selection",
+          "default": true
+        },
+        {
+          "type": "url",
+          "id": "size_guide",
+          "label": "Size guide link",
+          "info": "Appears beside the last option's label."
+        }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_quantity",
+          "label": "Show quantity selector",
+          "info": "Off by default. Shoppers adjust quantity in the bag.",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "buy_layout",
+          "label": "Quantity position",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Beside the add button"
+            },
+            {
+              "value": "stacked",
+              "label": "Above the add button"
+            }
+          ],
+          "default": "inline"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_save",
+          "label": "Show save button",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "label": "Show express checkout buttons",
+          "info": "Shop Pay, PayPal and the other accelerated methods you have enabled.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "links",
+      "name": "Detail links",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_1_label",
+          "label": "First label",
+          "default": "Information"
+        },
+        {
+          "type": "url",
+          "id": "link_1_url",
+          "label": "First link"
+        },
+        {
+          "type": "text",
+          "id": "link_2_label",
+          "label": "Second label",
+          "default": "Size guide"
+        },
+        {
+          "type": "url",
+          "id": "link_2_url",
+          "label": "Second link"
+        }
+      ]
+    },
+    {
+      "type": "inventory",
+      "name": "Stock note",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "low_stock_threshold",
+          "label": "Low stock below",
+          "min": 1,
+          "max": 25,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "note",
+          "label": "Note",
+          "default": "ships within two working days"
+        }
+      ]
+    },
+    {
+      "type": "collapsible",
+      "name": "Collapsible row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Materials"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "enabled_on": {
+    "templates": [
+      "product"
+    ]
+  }
+}
+{% endschema %}

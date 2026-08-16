@@ -1,0 +1,97 @@
+{%- comment -%}
+  The theme's entire token layer, shared by every layout so a colour scheme
+  behaves identically on the storefront, the password page and the gift card.
+
+  Colour tokens are emitted once per scheme rather than once at :root, so any
+  element carrying .color-scheme-2 rebases the whole palette for its subtree —
+  including the derived accent ramp. Type and geometry stay global.
+
+  The design's hand-picked camel ramp is regenerated from each scheme's single
+  accent colour: steps 100-400 mix toward that scheme's own ground, steps
+  600-900 darken. The weights are tuned to land on the original swatches when
+  the accent is left at its default #8a6f52.
+{%- endcomment -%}
+
+{%- for scheme in settings.color_schemes -%}
+  {%- liquid
+    assign accent = scheme.settings.accent
+    assign ground = scheme.settings.background
+    assign accent_100 = accent | color_mix: ground, 6
+    assign accent_200 = accent | color_mix: ground, 20
+    assign accent_300 = accent | color_mix: ground, 41
+    assign accent_400 = accent | color_mix: ground, 65
+    assign accent_600 = accent | color_darken: 6
+    assign accent_700 = accent | color_darken: 14
+    assign accent_800 = accent | color_darken: 21
+    assign accent_900 = accent | color_darken: 29
+    assign accent_2_700 = scheme.settings.accent_2 | color_darken: 14
+  -%}
+  {%- comment -%}
+    The *-rgb tokens must be comma separated, because the stylesheet feeds
+    them to the legacy rgba() form: rgba(var(--color-text-rgb), 0.6).
+
+    Liquid's `color.rgb` returns SPACE separated channels ("43 38 33"), which
+    would produce `rgba(43 38 33, 0.6)` — invalid, and an invalid var()
+    substitution makes the whole declaration compute to its initial value.
+    That silently kills every divider, muted text colour, tint and ring in
+    the theme. Emitting the channels individually is the only safe form.
+  {%- endcomment -%}
+  {% if forloop.first %}:root,{% endif %}
+  .color-{{ scheme.id }} {
+    --color-bg: {{ scheme.settings.background }};
+    --color-bg-rgb: {{ scheme.settings.background.red }}, {{ scheme.settings.background.green }}, {{ scheme.settings.background.blue }};
+    --color-surface: {{ scheme.settings.surface }};
+    --color-text: {{ scheme.settings.text }};
+    --color-text-rgb: {{ scheme.settings.text.red }}, {{ scheme.settings.text.green }}, {{ scheme.settings.text.blue }};
+    --color-divider: rgba(var(--color-text-rgb), {{ settings.divider_opacity | divided_by: 100.0 }});
+
+    --color-accent: {{ accent }};
+    --color-accent-rgb: {{ accent.red }}, {{ accent.green }}, {{ accent.blue }};
+    --color-accent-100: {{ accent_100 }};
+    --color-accent-200: {{ accent_200 }};
+    --color-accent-300: {{ accent_300 }};
+    --color-accent-400: {{ accent_400 }};
+    --color-accent-500: {{ accent }};
+    --color-accent-600: {{ accent_600 }};
+    --color-accent-700: {{ accent_700 }};
+    --color-accent-800: {{ accent_800 }};
+    --color-accent-900: {{ accent_900 }};
+    --color-accent-2: {{ scheme.settings.accent_2 }};
+    --color-accent-2-500: {{ scheme.settings.accent_2 }};
+    --color-accent-2-700: {{ accent_2_700 }};
+
+    {%- comment -%}
+      Solid buttons carry their own colours per scheme rather than borrowing
+      the text colour, so a merchant can make them their brand colour without
+      dragging every heading along with it. Outline and underline buttons
+      still follow the scheme's text colour, which is what makes them read as
+      secondary.
+    {%- endcomment -%}
+    --color-button: {{ scheme.settings.button }};
+    --color-button-rgb: {{ scheme.settings.button.red }}, {{ scheme.settings.button.green }}, {{ scheme.settings.button.blue }};
+    --color-button-text: {{ scheme.settings.button_label }};
+    --color-button-hover: {{ scheme.settings.button_hover }};
+
+    --ink-60: rgba(var(--color-text-rgb), 0.6);
+    --ink-70: rgba(var(--color-text-rgb), 0.7);
+    --ink-80: rgba(var(--color-text-rgb), 0.8);
+  }
+{%- endfor -%}
+
+:root {
+  --font-body: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+  --font-body-style: {{ settings.type_body_font.style }};
+  --font-body-weight: {{ settings.type_body_font.weight }};
+  --font-heading: {{ settings.type_heading_font.family }}, {{ settings.type_heading_font.fallback_families }};
+  --font-heading-style: {{ settings.type_heading_font.style }};
+  --font-accent: {{ settings.type_accent_font.family }}, {{ settings.type_accent_font.fallback_families }};
+  --font-display-weight: {{ settings.heading_weight }};
+  --type-scale: {{ settings.type_scale | divided_by: 100.0 }};
+  --heading-tracking: {{ settings.heading_tracking | divided_by: 1000.0 }}em;
+
+  --r: {{ settings.corner_radius }}px;
+  --edge: clamp({{ settings.edge_min }}px, 4vw, {{ settings.edge_max }}px);
+  --page-width: {{ settings.page_width }}px;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --slow: cubic-bezier(.16, 1, .3, 1);
+}

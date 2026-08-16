@@ -1,0 +1,147 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "blocks": {
+        "hotspot-1": {
+          "type": "hotspot",
+          "settings": { "x": 24, "y": 30 }
+        },
+        "hotspot-2": {
+          "type": "hotspot",
+          "settings": { "x": 49, "y": 24 }
+        },
+        "hotspot-3": {
+          "type": "hotspot",
+          "settings": { "x": 74, "y": 36 }
+        },
+        "pill-1": {
+          "type": "pill",
+          "settings": { "text": "A/W 26" }
+        },
+        "pill-2": {
+          "type": "pill",
+          "settings": { "text": "Shoppable" }
+        }
+      },
+      "block_order": ["hotspot-1", "hotspot-2", "hotspot-3", "pill-1", "pill-2"],
+      "settings": {
+        "height": 78,
+        "veil": 60,
+        "label": "The new season",
+        "heading": "Easy by <em>design</em>",
+        "body": "Soft tailoring, gauzy cottons and knits that move with you. Twenty-four pieces made to wear together, season after season.",
+        "button_label": "Shop the edit"
+      }
+    },
+    "featured": {
+      "type": "featured-products",
+      "settings": {
+        "label": "01 — Just landed",
+        "heading": "New this week",
+        "count": 4,
+        "columns": 4,
+        "show_view_all": true
+      }
+    },
+    "marquee": {
+      "type": "marquee",
+      "blocks": {
+        "message-1": {
+          "type": "message",
+          "settings": { "text": "Named mills <em>—</em> Cariaggi cashmere" }
+        },
+        "message-2": {
+          "type": "message",
+          "settings": { "text": "Cut and sewn in Porto" }
+        },
+        "message-3": {
+          "type": "message",
+          "settings": { "text": "Free repairs for life" }
+        },
+        "message-4": {
+          "type": "message",
+          "settings": { "text": "Two drops a year, never a sale" }
+        }
+      },
+      "block_order": ["message-1", "message-2", "message-3", "message-4"],
+      "settings": { "speed": 46 }
+    },
+    "tiles": {
+      "type": "category-tiles",
+      "blocks": {
+        "tile-1": { "type": "tile", "settings": { "heading": "Outerwear" } },
+        "tile-2": { "type": "tile", "settings": { "heading": "Knitwear" } },
+        "tile-3": { "type": "tile", "settings": { "heading": "Dresses" } }
+      },
+      "block_order": ["tile-1", "tile-2", "tile-3"],
+      "settings": {
+        "label": "02 — Wardrobe",
+        "heading": "Shop by category",
+        "show_counts": true
+      }
+    },
+    "editorial": {
+      "type": "editorial-split",
+      "settings": {
+        "image_position": "left",
+        "label": "03 — The making",
+        "heading": "We name the mill,\nthe yarn and the maker.",
+        "body": "<p>Every product page lists where the cloth was woven and who sewed it. The gauze shirt is Albini cotton, the knit is two-ply Cariaggi cashmere, and both were finished by the same twelve people in Porto.</p>",
+        "button_label": "Read a product page"
+      }
+    },
+    "lookbook": {
+      "type": "lookbook",
+      "blocks": {
+        "look-1": { "type": "look", "settings": { "caption": "Look 01 — The long coat" } },
+        "look-2": { "type": "look", "settings": { "caption": "Look 02 — Gauze & wool" } },
+        "look-3": { "type": "look", "settings": { "caption": "Look 03 — Knit dressing" } },
+        "look-4": { "type": "look", "settings": { "caption": "Look 04 — Off duty" } },
+        "look-5": { "type": "look", "settings": { "caption": "Look 05 — Evening" } }
+      },
+      "block_order": ["look-1", "look-2", "look-3", "look-4", "look-5"],
+      "settings": {
+        "label": "04 — Lookbook",
+        "heading": "A/W 26 in the round",
+        "hint": "Drag to explore →"
+      }
+    },
+    "values": {
+      "type": "values",
+      "blocks": {
+        "value-1": {
+          "type": "value",
+          "settings": {
+            "heading": "Named materials",
+            "body": "Mill, weight and composition on every page. No “premium fabric.”"
+          }
+        },
+        "value-2": {
+          "type": "value",
+          "settings": {
+            "heading": "Repairs, free",
+            "body": "Send it back for the life of the garment. We re-tape seams and replace buttons."
+          }
+        },
+        "value-3": {
+          "type": "value",
+          "settings": {
+            "heading": "Two drops a year",
+            "body": "Spring and autumn. Nothing in between, nothing discounted."
+          }
+        },
+        "value-4": {
+          "type": "value",
+          "settings": {
+            "heading": "Returns in 30 days",
+            "body": "Unworn, tags on, prepaid label in the box. No form to fill in."
+          }
+        }
+      },
+      "block_order": ["value-1", "value-2", "value-3", "value-4"],
+      "settings": { "show_numbers": true }
+    }
+  },
+  "order": ["hero", "featured", "marquee", "tiles", "editorial", "lookbook", "values"]
+}

@@ -1,0 +1,114 @@
+﻿<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_schemes.first.settings.background }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 48, height: 48 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; {{ 'general.meta.tagged' | t: tags: current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {% render 'meta-tags' %}
+
+    {%- unless settings.type_body_font.system? and settings.type_heading_font.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+
+    {{ content_for_header }}
+
+    {%- liquid
+      assign body_light = settings.type_body_font | font_modify: 'weight', '300'
+      assign body_medium = settings.type_body_font | font_modify: 'weight', '500'
+      assign body_semibold = settings.type_body_font | font_modify: 'weight', '600'
+      assign body_italic = settings.type_body_font | font_modify: 'style', 'italic'
+      assign heading_light = settings.type_heading_font | font_modify: 'weight', '300'
+      assign heading_medium = settings.type_heading_font | font_modify: 'weight', '500'
+    -%}
+
+    {% style %}
+      {{ settings.type_body_font | font_face: font_display: 'swap' }}
+      {{ settings.type_heading_font | font_face: font_display: 'swap' }}
+      {{ settings.type_accent_font | font_face: font_display: 'swap' }}
+      {%- if body_light %}{{ body_light | font_face: font_display: 'swap' }}{% endif -%}
+      {%- if body_medium %}{{ body_medium | font_face: font_display: 'swap' }}{% endif -%}
+      {%- if body_semibold %}{{ body_semibold | font_face: font_display: 'swap' }}{% endif -%}
+      {%- if body_italic %}{{ body_italic | font_face: font_display: 'swap' }}{% endif -%}
+      {%- if heading_light %}{{ heading_light | font_face: font_display: 'swap' }}{% endif -%}
+      {%- if heading_medium %}{{ heading_medium | font_face: font_display: 'swap' }}{% endif -%}
+
+      {% render 'css-variables' %}
+    {% endstyle %}
+
+    {{ 'mundo.css' | asset_url | stylesheet_tag }}
+
+    {%- unless settings.type_body_font.system? -%}
+      {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    {%- endunless -%}
+
+    <script>
+      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+      window.mundoRoutes = {
+        cart_add: '{{ routes.cart_add_url }}',
+        cart_change: '{{ routes.cart_change_url }}',
+        cart_update: '{{ routes.cart_update_url }}',
+        cart: '{{ routes.cart_url }}',
+        predictive_search: '{{ routes.predictive_search_url }}'
+      };
+      window.mundoStrings = {
+        addedToBag: {{ 'sections.cart.added' | t | json }},
+        cartError: {{ 'sections.cart.error' | t | json }},
+        signupThanks: {{ 'sections.newsletter.success' | t | json }},
+        soldOut: {{ 'products.product.sold_out' | t | json }},
+        unavailable: {{ 'products.product.unavailable' | t | json }},
+        addToBag: {{ 'products.product.add_to_bag' | t | json }},
+        saved: {{ 'products.product.saved' | t | json }},
+        removedFromSaved: {{ 'products.product.removed_from_saved' | t | json }}
+      };
+      window.mundoSettings = {
+        cartType: {{ settings.cart_type | json }},
+        reveal: {{ settings.motion_reveal | json }},
+        parallax: {{ settings.motion_parallax | json }}
+      };
+    </script>
+
+    <script src="{{ 'mundo.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+    {%- if request.page_type == 'product' or request.page_type == 'index' or request.page_type == 'collection' -%}
+      <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+    {%- if settings.predictive_search_enabled -%}
+      <script src="{{ 'search.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+  </head>
+
+  <body class="template--{{ request.page_type | handle }}">
+    <a class="skip-link b b-solid" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {%- if settings.cart_type == 'drawer' -%}
+      {% section 'cart-drawer' %}
+    {%- endif -%}
+
+    <div class="toast" id="Toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

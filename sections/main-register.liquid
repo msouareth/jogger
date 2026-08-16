@@ -1,0 +1,70 @@
+<div class="wrap account">
+  <div class="page-head">
+    <h1 class="dsp" style="font-size: calc(clamp(30px, 3.6vw, 48px) * var(--type-scale));">
+      {{ 'customer.register.title' | t }}
+    </h1>
+  </div>
+
+  <div class="account-form">
+    {%- form 'create_customer', novalidate: 'novalidate' -%}
+      {%- if form.errors -%}
+        <div class="form-error">
+          <ul>
+            {%- for field in form.errors -%}
+              <li>{{ form.errors.messages[field] }}</li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      <div class="field">
+        <label for="RegisterFirstName">{{ 'customer.register.first_name' | t }}</label>
+        <input type="text" id="RegisterFirstName" name="customer[first_name]" autocomplete="given-name">
+      </div>
+
+      <div class="field">
+        <label for="RegisterLastName">{{ 'customer.register.last_name' | t }}</label>
+        <input type="text" id="RegisterLastName" name="customer[last_name]" autocomplete="family-name">
+      </div>
+
+      <div class="field">
+        <label for="RegisterEmail">{{ 'customer.register.email' | t }}</label>
+        <input type="email" id="RegisterEmail" name="customer[email]" autocomplete="email" required>
+      </div>
+
+      <div class="field">
+        <label for="RegisterPassword">{{ 'customer.register.password' | t }}</label>
+        <input
+          type="password"
+          id="RegisterPassword"
+          name="customer[password]"
+          autocomplete="new-password"
+          required
+        >
+      </div>
+
+      <div>
+        <button type="submit" class="b b-solid">
+          {{ 'customer.register.submit' | t }}
+          <span class="ar">&rarr;</span>
+        </button>
+      </div>
+
+      <p class="form-note">
+        <a href="{{ routes.account_login_url }}">{{ 'customer.register.login' | t }}</a>
+      </p>
+    {%- endform -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Register",
+  "tag": "section",
+  "class": "section-register",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["customers/register"]
+  }
+}
+{% endschema %}

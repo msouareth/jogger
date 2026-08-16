@@ -1,0 +1,199 @@
+{%- liquid
+  assign columns = section.settings.columns
+
+  case columns
+    when 3
+      assign grid_sizes = '(min-width: 1100px) 33vw, 50vw'
+    when 4
+      assign grid_sizes = '(min-width: 1100px) 25vw, 50vw'
+    else
+      assign grid_sizes = '(min-width: 1100px) 20vw, 50vw'
+  endcase
+
+  comment
+    Only list filters map cleanly onto the design's chip row. Price
+    ranges and ratings are left out rather than crammed into a pill.
+  endcomment
+  assign list_filters = collection.filters | where: 'type', 'list'
+  assign active_count = 0
+  for filter in list_filters
+    assign active_count = active_count | plus: filter.active_values.size
+  endfor
+
+  comment
+    Liquid resolves `a and b or c` right-to-left, so the bar's visibility
+    is worked out in steps rather than in one expression.
+  endcomment
+  assign show_chips = false
+  if section.settings.show_filters and list_filters.size > 0
+    assign show_chips = true
+  endif
+
+  assign show_bar = false
+  if show_chips
+    assign show_bar = true
+  elsif section.settings.show_sort
+    assign show_bar = true
+  endif
+-%}
+
+<div class="wrap">
+  <div class="chead">
+    <p class="crumb">
+      <a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a>
+      &nbsp;/&nbsp;{{ collection.title | escape }}
+    </p>
+    <h1 class="dsp">{{ collection.title | escape }}</h1>
+    {%- if section.settings.show_description and collection.description != blank -%}
+      <div class="body rte">{{ collection.description }}</div>
+    {%- endif -%}
+  </div>
+
+  {%- paginate collection.products by section.settings.per_page -%}
+    {%- if show_bar -%}
+      <div class="cbar">
+        {%- if show_chips -%}
+          <div class="chips">
+            <a
+              class="chip"
+              href="{{ collection.url }}{% if collection.sort_by != blank %}?sort_by={{ collection.sort_by }}{% endif %}"
+              {% if active_count == 0 %}data-on{% endif %}
+            >
+              {{ 'products.facets.all' | t }}
+            </a>
+
+            {%- for filter in list_filters -%}
+              {%- for value in filter.values -%}
+                {%- if value.count == 0 and value.active == false -%}
+                  {%- continue -%}
+                {%- endif -%}
+                <a
+                  class="chip"
+                  href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                  {% if value.active %}data-on aria-current="true"{% endif %}
+                >
+                  {{ value.label | escape }}
+                  {%- if value.active -%}
+                    <span class="x" aria-hidden="true">&times;</span>
+                    <span class="visually-hidden">{{ 'products.facets.clear' | t }}</span>
+                  {%- endif -%}
+                </a>
+              {%- endfor -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        <div class="right">
+          <span class="n">
+            {{ 'products.facets.count' | t: count: collection.products_count }}
+          </span>
+
+          {%- if section.settings.show_sort -%}
+            <form method="get" action="{{ collection.url }}">
+              {%- comment -%}
+                Carry active filters through the sort change, otherwise
+                sorting would silently clear the visitor's chips.
+              {%- endcomment -%}
+              {%- for filter in collection.filters -%}
+                {%- for value in filter.active_values -%}
+                  <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+                {%- endfor -%}
+              {%- endfor -%}
+
+              <label class="visually-hidden" for="SortBy">{{ 'products.facets.sort_by' | t }}</label>
+              <select id="SortBy" name="sort_by" onchange="this.form.submit()">
+                {%- for option in collection.sort_options -%}
+                  <option
+                    value="{{ option.value }}"
+                    {% if option.value == collection.sort_by %}selected{% endif %}
+                  >
+                    {{ option.name }}
+                  </option>
+                {%- endfor -%}
+              </select>
+              <noscript><button type="submit" class="chip">{{ 'products.facets.sort_by' | t }}</button></noscript>
+            </form>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if collection.products.size > 0 -%}
+      <div class="pgrid" style="--cols: {{ columns }};">
+        {%- for product in collection.products -%}
+          {% render 'product-card',
+            product: product,
+            index: forloop.index0,
+            sizes: grid_sizes,
+            loading: 'eager'
+          %}
+        {%- endfor -%}
+      </div>
+
+      {% render 'pagination', paginate: paginate %}
+    {%- else -%}
+      <div class="collection-empty">
+        <h2 class="h2">{{ 'sections.collection.empty_title' | t }}</h2>
+        <p class="body" style="margin-top: 14px;">{{ 'sections.collection.empty_body' | t }}</p>
+        <p style="margin-top: 24px;">
+          <a class="b b-line" href="{{ collection.url }}">
+            {{ 'products.facets.clear_all' | t }}
+            <span class="ar">&rarr;</span>
+          </a>
+        </p>
+      </div>
+    {%- endif -%}
+  {%- endpaginate -%}
+
+  <div style="height: clamp(56px, 8vw, 100px);"></div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection",
+  "tag": "section",
+  "class": "section-collection",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show filter chips",
+      "info": "Set your filters up in the Search & Discovery app. List filters appear as chips.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Show sorting",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    }
+  ],
+  "enabled_on": {
+    "templates": ["collection"]
+  }
+}
+{% endschema %}

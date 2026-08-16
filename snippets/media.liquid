@@ -1,0 +1,67 @@
+{%- comment -%}
+  Renders an image inside a ratio-locked frame so nothing shifts on paint.
+
+  Accepts:
+  - image        {Object}  Image drop. Falls back to a placeholder when blank.
+  - ratio        {String}  CSS aspect-ratio, e.g. '3 / 4'. Optional — omit when
+                           the frame is sized by its parent (hero, tiles, cards).
+  - sizes        {String}  The sizes attribute. Default: 100vw.
+  - class        {String}  Extra classes on the frame.
+  - alt          {String}  Overrides the image's own alt text.
+  - loading      {String}  'lazy' (default) or 'eager'.
+  - fetchpriority {String} Passed through for LCP images.
+  - placeholder  {String}  Placeholder SVG name when there is no image.
+  - contain      {Boolean} Fit the image inside the frame instead of cropping.
+{%- endcomment -%}
+
+{%- liquid
+  assign sizes_attr = sizes | default: '100vw'
+  assign loading_attr = loading | default: 'lazy'
+  assign placeholder_name = placeholder | default: 'image'
+  assign fit_class = ''
+  if contain
+    assign fit_class = ' media--contain'
+  endif
+-%}
+
+<div
+  class="media{{ fit_class }}{% if class %} {{ class }}{% endif %}"
+  {% if ratio %}style="aspect-ratio: {{ ratio }};"{% endif %}
+>
+  {%- if image != blank -%}
+    <img
+      src="{{ image | image_url: width: 940 }}"
+      srcset="{{ image | image_url: width: 165 }} 165w,
+        {{ image | image_url: width: 265 }} 265w,
+        {{ image | image_url: width: 360 }} 360w,
+        {{ image | image_url: width: 533 }} 533w,
+        {{ image | image_url: width: 720 }} 720w,
+        {{ image | image_url: width: 940 }} 940w,
+        {{ image | image_url: width: 1066 }} 1066w,
+        {{ image | image_url: width: 1500 }} 1500w,
+        {{ image | image_url: width: 2000 }} 2000w"
+      sizes="{{ sizes_attr }}"
+      alt="{{ alt | default: image.alt | escape }}"
+      width="{{ image.width }}"
+      height="{{ image.height }}"
+      loading="{{ loading_attr }}"
+      {% if fetchpriority %}fetchpriority="{{ fetchpriority }}"{% endif %}
+      {% comment %}
+        Every frame here crops to fill, and a frame's shape changes with the
+        viewport — the hero is a fixed height against a fluid width, so a wide
+        window cuts far more off the top and bottom than a narrow one. Cropping
+        from the centre, which is the default, is what takes a subject's head
+        off on wide screens.
+
+        Shopify already has the answer: the focal point set on the image in
+        Content > Files or the image picker. Passing it through as
+        object-position keeps whatever the merchant marked in frame at every
+        crop. Left unset it resolves to the centre, exactly as before.
+      {% endcomment %}
+      {% if image.presentation.focal_point %}style="object-position: {{ image.presentation.focal_point }};"{% endif %}
+      decoding="async"
+    >
+  {%- else -%}
+    {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+  {%- endif -%}
+</div>

@@ -1,0 +1,56 @@
+{%- comment -%}
+  Per-element typography overrides.
+
+  Emits bare CSS declarations — no style="" wrapper — so a call site that
+  already has inline custom properties can concatenate them:
+
+    {%- capture heading_style -%}
+      {% render 'text-style', s: section.settings, key: 'heading' %}
+    {%- endcapture -%}
+    <h2 class="h2" style="--i: 1;{{ heading_style }}">
+
+  Size is emitted as --ts, a multiplier every type class in mundo.css folds
+  into its own clamp(), so an override scales the element responsively rather
+  than pinning it to one pixel value.
+
+  Accepts:
+  - s   {Object} settings object — section.settings or block.settings
+  - key {String} setting prefix. 'heading' reads heading_font, heading_size
+                 and heading_color.
+{%- endcomment -%}
+
+{%- liquid
+  assign font_key = key | append: '_font'
+  assign size_key = key | append: '_size'
+  assign color_key = key | append: '_color'
+
+  assign font = s[font_key]
+  assign size = s[size_key]
+  assign text_color = s[color_key]
+
+  assign out = ''
+
+  case font
+    when 'heading'
+      assign out = out | append: 'font-family:var(--font-heading);'
+    when 'body'
+      assign out = out | append: 'font-family:var(--font-body);'
+    when 'accent'
+      assign out = out | append: 'font-family:var(--font-accent);'
+  endcase
+
+  comment
+    100 means "leave it alone", so nothing is emitted and the class keeps
+    its own responsive size untouched.
+  endcomment
+  if size != blank and size != 100
+    assign ratio = size | divided_by: 100.0
+    assign out = out | append: '--ts:' | append: ratio | append: ';'
+  endif
+
+  if text_color != blank
+    assign out = out | append: 'color:' | append: text_color | append: ';'
+  endif
+
+  echo out
+-%}

@@ -1,0 +1,463 @@
+{%- liquid
+  assign hero_image = section.settings.image
+
+  comment
+    Whole-image mode gives the frame the picture's own proportions instead of a
+    fixed height, so filling it crops nothing. It needs a real image to take a
+    ratio from — the placeholder has none, so the fixed height stands in.
+  endcomment
+  assign whole = false
+  if section.settings.image_fit == 'whole' and hero_image != blank
+    assign whole = true
+  endif
+
+  comment
+    The drift is a slow zoom, so it is a crop by definition. Asking to see the
+    whole image and asking to zoom into it are contradictory; the explicit
+    choice wins.
+  endcomment
+  assign drift = ''
+  if settings.motion_kenburns and whole == false
+    assign drift = ' kb'
+  endif
+
+  assign frame_class = 'hero-frame'
+  if whole
+    assign frame_class = 'hero-frame hero-frame--whole'
+  endif
+-%}
+
+<div class="scheme color-{{ section.settings.color_scheme }}">
+<div class="hero">
+  <div
+    class="{{ frame_class }}"
+    style="--hero-height: {{ section.settings.height }}vh; --veil: {{ section.settings.veil | divided_by: 100.0 }};{% if whole %} --hero-ratio: {{ hero_image.aspect_ratio }};{% endif %}"
+  >
+    {% render 'media',
+      image: section.settings.image,
+      class: drift,
+      sizes: '100vw',
+      loading: 'eager',
+      fetchpriority: 'high',
+      placeholder: 'lifestyle-1',
+      alt: section.settings.image_alt
+    %}
+
+    <div class="hero-veil"></div>
+
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'hotspot' -%}
+          {%- assign spot_product = block.settings.product -%}
+          {%- if spot_product != blank -%}
+            <a
+              class="spot"
+              href="{{ spot_product.url }}"
+              style="left: {{ block.settings.x }}%; top: {{ block.settings.y }}%;"
+              aria-label="{{ 'products.product.view' | t: title: spot_product.title }}"
+              {{ block.shopify_attributes }}
+            >
+              <i aria-hidden="true"></i>
+              <span class="tip">
+                <b>{{ spot_product.title | escape }}</b>
+                <span>{% render 'price', product: spot_product %}</span>
+              </span>
+            </a>
+          {%- endif -%}
+      {%- endcase -%}
+    {%- endfor -%}
+
+    {%- assign pill_blocks = section.blocks | where: 'type', 'pill' -%}
+    {%- if pill_blocks.size > 0 -%}
+      <div class="hero-side">
+        {%- for block in pill_blocks -%}
+          <span class="pill" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+    {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+    {%- capture body_style %}{% render 'text-style', s: section.settings, key: 'body' %}{% endcapture -%}
+    {%- capture button_style %}{% render 'text-style', s: section.settings, key: 'button' %}{% endcapture -%}
+    {%- capture button_colors %}{% render 'button-style', s: section.settings, key: 'button' %}{% endcapture -%}
+
+    <div class="hero-card">
+      {%- if section.settings.label != blank -%}
+        <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="dsp" style="{{ heading_style }}">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.body != blank -%}
+        <p style="{{ body_style }}">{{ section.settings.body | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank -%}
+        <a
+          class="b b-paper"
+          href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+          style="{{ button_style }}{{ button_colors }}"
+        >
+          {{ section.settings.button_label | escape }}
+          <span class="ar">&rarr;</span>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+</div>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "class": "section-hero",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image description",
+      "info": "Describes the image for screen readers and when the image fails to load."
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Image",
+      "info": "Filling the frame keeps the hero the same height on every screen, and crops the picture to fit — a wide screen crops more off the top and bottom than a narrow one. Showing the whole picture instead gives the frame the picture's own proportions, so nothing is cropped, but the hero's height then changes with the shape of the image you upload and the Height setting no longer applies. The slow zoom is also turned off, since it is a crop.",
+      "options": [
+        { "value": "fill", "label": "Fill the frame (crops to fit)" },
+        { "value": "whole", "label": "Show the whole picture" }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "Height",
+      "info": "As a share of the screen height, clamped between 460 and 820px. Only applies when the image fills the frame.",
+      "min": 50,
+      "max": 95,
+      "step": 1,
+      "unit": "%",
+      "default": 78
+    },
+    {
+      "type": "range",
+      "id": "veil",
+      "label": "Shading",
+      "info": "Darkens the foot of the image so the text stays legible.",
+      "min": 0,
+      "max": 85,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "The new season"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Wrap a word in italics to set it in the heavier weight.",
+      "default": "Easy by <em>design</em>"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Text",
+      "default": "Soft tailoring, gauzy cottons and knits that move with you. Twenty-four pieces made to wear together, season after season."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop the edit"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Text type"
+    },
+    {
+      "type": "select",
+      "id": "body_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Button type"
+    },
+    {
+      "type": "select",
+      "id": "button_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Button colours"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Fill",
+      "info": "Leave empty to follow the colour scheme. On outline and underline buttons this is the line colour."
+    },
+    {
+      "type": "color",
+      "id": "button_fg",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "button_hover",
+      "label": "On hover"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Shoppable hotspot",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "range",
+          "id": "x",
+          "label": "Horizontal position",
+          "min": 2,
+          "max": 96,
+          "step": 1,
+          "unit": "%",
+          "default": 25
+        },
+        {
+          "type": "range",
+          "id": "y",
+          "label": "Vertical position",
+          "min": 2,
+          "max": 92,
+          "step": 1,
+          "unit": "%",
+          "default": 30
+        }
+      ]
+    },
+    {
+      "type": "pill",
+      "name": "Pill",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "A/W 26"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero",
+      "blocks": [
+        {
+          "type": "pill"
+        },
+        {
+          "type": "pill",
+          "settings": {
+            "text": "Shoppable"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

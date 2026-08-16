@@ -1,0 +1,124 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "show_breadcrumb": true,
+            "uppercase": true,
+            "show_subtitle": true,
+            "subtitle_source": "type"
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "description": {
+          "type": "description",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": { "update_url": true }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity": false,
+            "buy_layout": "inline",
+            "show_save": false,
+            "show_dynamic_checkout": true
+          }
+        },
+        "links": {
+          "type": "links",
+          "settings": {
+            "link_1_label": "Information",
+            "link_2_label": "Size guide"
+          }
+        },
+        "inventory": {
+          "type": "inventory",
+          "settings": {
+            "low_stock_threshold": 5,
+            "note": "ships within two working days"
+          }
+        },
+        "materials": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Materials",
+            "body": "<p>Name the mill, the yarn and the weight here. Shoppers who care about cloth read this first.</p>",
+            "open": true
+          }
+        },
+        "fit": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Fit & sizing",
+            "body": "<p>How it sits, the length on a size M, and the height of the model wearing it.</p>",
+            "open": false
+          }
+        },
+        "care": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Care & repairs",
+            "body": "<p>Washing instructions and your repairs policy.</p>",
+            "open": false
+          }
+        },
+        "shipping": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Shipping & returns",
+            "body": "<p>Delivery times, the free shipping threshold and your returns window.</p>",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "variant_picker",
+        "buy_buttons",
+        "links",
+        "description",
+        "inventory",
+        "materials",
+        "fit",
+        "care",
+        "shipping"
+      ],
+      "settings": {
+        "media_layout": "gallery",
+        "stage_ratio": "3 / 4",
+        "stage_fit": "cover",
+        "stage_padding": 0,
+        "stage_max_height": 75,
+        "show_thumbnails": true,
+        "thumb_position": "left",
+        "density": "compact",
+        "info_card": false,
+        "card_center": false,
+        "size_style": "underline",
+        "button_shape": "square",
+        "swatch_style": "image"
+      }
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "heading": "Complete the look",
+        "source": "collection",
+        "layout": "carousel",
+        "columns": 4,
+        "count": 8
+      }
+    }
+  },
+  "order": ["main", "related"]
+}

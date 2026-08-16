@@ -1,0 +1,92 @@
+{
+  "settings": {
+    "palette": {
+      "name": "Colours",
+      "ground": "Ground",
+      "background": "Page background",
+      "surface": "Surface",
+      "surface_info": "Fills image frames, the newsletter panel and empty states.",
+      "text": "Text",
+      "divider_opacity": "Divider strength",
+      "accents": "Accents",
+      "accent": "Accent",
+      "accent_info": "The full light-to-dark ramp is generated from this one colour.",
+      "accent_2": "Secondary accent",
+      "accent_2_info": "Used sparingly — new badges, the free-shipping bar and in-stock marks.",
+      "button": "Button",
+      "button_info": "The solid buttons — add to bag, checkout, the hero call to action.",
+      "button_label": "Button text",
+      "button_hover": "Button on hover"
+    },
+    "typography": {
+      "name": "Typography",
+      "body_font": "Body font",
+      "heading_font": "Heading font",
+      "heading_font_info": "Set both to the same family for the flush, single-typeface look of the original design.",
+      "accent_font": "Accent font",
+      "accent_font_info": "A third font any individual heading, label or paragraph can be switched to. Leave it matching the others unless you want a deliberate contrast.",
+      "heading_weight": "Display weight",
+      "heading_weight_info": "Weight of the largest headings. 300 gives the light, wide-set look; 500 reads bolder.",
+      "scale": "Type scale",
+      "tracking": "Heading tracking",
+      "tracking_info": "Negative values tighten large headings. Measured in thousandths of an em."
+    },
+    "layout": {
+      "name": "Layout",
+      "page_width": "Maximum content width",
+      "edge_min": "Edge padding, small screens",
+      "edge_max": "Edge padding, large screens",
+      "corner_radius": "Corner radius",
+      "corner_radius_info": "Applies to image frames and panels. Buttons and chips stay fully rounded."
+    },
+    "motion": {
+      "name": "Motion",
+      "reduced_motion_note": "Every animation here is disabled automatically for visitors who ask their device to reduce motion.",
+      "reveal": "Reveal on scroll",
+      "reveal_info": "Sections fade and rise into place as they enter the viewport.",
+      "kenburns": "Hero drift",
+      "kenburns_info": "Slowly scales the hero image for a subtle sense of movement.",
+      "parallax": "Editorial parallax",
+      "parallax_info": "Shifts the editorial image against the scroll."
+    },
+    "product_card": {
+      "name": "Product cards",
+      "quick_add": "Quick add button",
+      "quick_add_info": "Shown on hover. Products with options link to the product page instead of adding blind.",
+      "wishlist": "Save button",
+      "wishlist_info": "Saves to the visitor's browser — no account needed.",
+      "swatches": "Colour dots",
+      "swatches_info": "Reads the product's colour option, using swatch values where you have set them.",
+      "second_image": "Show second image on hover",
+      "subtitle": "Card subtitle",
+      "subtitle_type": "Product type",
+      "subtitle_vendor": "Vendor",
+      "subtitle_none": "None"
+    },
+    "cart": {
+      "name": "Bag",
+      "type": "Bag style",
+      "type_drawer": "Slide-out drawer",
+      "type_page": "Separate page",
+      "free_shipping_bar": "Show free shipping progress",
+      "threshold": "Free shipping threshold",
+      "threshold_info": "In your store's currency, without a symbol. For example 150.",
+      "notes": "Allow order notes"
+    },
+    "search": {
+      "name": "Search",
+      "predictive": "Suggest results as visitors type",
+      "show_price": "Show prices in suggestions"
+    },
+    "social": {
+      "name": "Social accounts"
+    },
+    "brand": {
+      "name": "Brand",
+      "favicon": "Favicon",
+      "favicon_info": "48 × 48px .png recommended.",
+      "share_image": "Social sharing image",
+      "share_image_info": "Used when a link to your store is shared and the page has no image of its own."
+    }
+  }
+}

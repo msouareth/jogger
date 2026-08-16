@@ -1,0 +1,69 @@
+{%- comment -%}
+  Rendered on its own by search.js via the predictive search endpoint.
+  Only the [data-predictive-results] subtree is read back.
+{%- endcomment -%}
+
+<div class="predictive" data-predictive-results>
+  {%- if predictive_search.performed -%}
+    {%- if predictive_search.resources.products.size > 0 -%}
+      <p class="lab">{{ 'general.search.products' | t }}</p>
+      <ul>
+        {%- for product in predictive_search.resources.products -%}
+          <li>
+            <a href="{{ product.url }}">
+              <span class="th media">
+                {% render 'media', image: product.featured_image, sizes: '52px', placeholder: 'product-1' %}
+              </span>
+              <span>
+                <h4>{{ product.title | escape }}</h4>
+                <span class="cat">{{ product.type | escape }}</span>
+              </span>
+              {%- if settings.predictive_search_show_price -%}
+                <span class="pr">{% render 'price', product: product %}</span>
+              {%- else -%}
+                <span></span>
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.collections.size > 0 -%}
+      <p class="lab" style="margin-top: 20px;">{{ 'general.search.collections' | t }}</p>
+      <ul>
+        {%- for collection in predictive_search.resources.collections -%}
+          <li>
+            <a href="{{ collection.url }}">
+              <span></span>
+              <span><h4>{{ collection.title | escape }}</h4></span>
+              <span></span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.articles.size > 0 -%}
+      <p class="lab" style="margin-top: 20px;">{{ 'general.search.articles' | t }}</p>
+      <ul>
+        {%- for article in predictive_search.resources.articles -%}
+          <li>
+            <a href="{{ article.url }}">
+              <span></span>
+              <span><h4>{{ article.title | escape }}</h4></span>
+              <span></span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.products.size == 0
+      and predictive_search.resources.collections.size == 0
+      and predictive_search.resources.articles.size == 0
+    -%}
+      <p class="form-note">{{ 'general.search.no_results' | t: terms: predictive_search.terms }}</p>
+    {%- endif -%}
+  {%- endif -%}
+</div>

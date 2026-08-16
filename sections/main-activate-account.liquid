@@ -1,0 +1,66 @@
+<div class="wrap account">
+  <div class="page-head">
+    <h1 class="dsp" style="font-size: calc(clamp(30px, 3.6vw, 48px) * var(--type-scale));">
+      {{ 'customer.activate_account.title' | t }}
+    </h1>
+    <p class="body" style="margin-top: 16px;">{{ 'customer.activate_account.subtext' | t }}</p>
+  </div>
+
+  <div class="account-form">
+    {%- form 'activate_customer_password' -%}
+      {%- if form.errors -%}
+        <div class="form-error">
+          <ul>
+            {%- for field in form.errors -%}
+              <li>{{ form.errors.messages[field] }}</li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      <div class="field">
+        <label for="ActivatePassword">{{ 'customer.activate_account.password' | t }}</label>
+        <input
+          type="password"
+          id="ActivatePassword"
+          name="customer[password]"
+          autocomplete="new-password"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="ActivatePasswordConfirm">{{ 'customer.activate_account.password_confirm' | t }}</label>
+        <input
+          type="password"
+          id="ActivatePasswordConfirm"
+          name="customer[password_confirmation]"
+          autocomplete="new-password"
+          required
+        >
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button type="submit" class="b b-solid">
+          {{ 'customer.activate_account.submit' | t }}
+          <span class="ar">&rarr;</span>
+        </button>
+        <button type="submit" name="decline" class="b b-line">
+          {{ 'customer.activate_account.cancel' | t }}
+        </button>
+      </div>
+    {%- endform -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Activate account",
+  "tag": "section",
+  "class": "section-activate",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["customers/activate_account"]
+  }
+}
+{% endschema %}

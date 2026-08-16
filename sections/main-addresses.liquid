@@ -1,0 +1,62 @@
+<div class="wrap account">
+  <div class="page-head">
+    <p class="crumb"><a href="{{ routes.account_url }}">{{ 'customer.account.return' | t }}</a></p>
+    <h1 class="dsp" style="font-size: calc(clamp(30px, 3.6vw, 48px) * var(--type-scale));">
+      {{ 'customer.addresses.title' | t }}
+    </h1>
+  </div>
+
+  {%- paginate customer.addresses by 10 -%}
+    <div class="account-form" style="max-width: 560px;">
+      <details>
+        <summary class="b b-line" style="list-style: none;">{{ 'customer.addresses.add' | t }}</summary>
+        {% render 'address-form', address: customer.new_address, form_id: 'AddressNew', is_new: true %}
+      </details>
+    </div>
+
+    {%- for address in customer.addresses -%}
+      <div style="padding: 26px 0; border-bottom: 1px solid var(--color-divider); max-width: 560px;">
+        {%- if address == customer.default_address -%}
+          <p class="lab">{{ 'customer.addresses.set_default' | t }}</p>
+        {%- endif -%}
+
+        <div class="form-note" style="margin: 10px 0 16px;">{{ address | format_address }}</div>
+
+        <details>
+          <summary class="b b-ghost" style="list-style: none;">{{ 'customer.addresses.edit' | t }}</summary>
+          {% render 'address-form',
+            address: address,
+            form_id: 'Address',
+            is_new: false
+          %}
+        </details>
+
+        {%- form 'customer_address', address -%}
+          <input type="hidden" name="_method" value="delete">
+          <button
+            type="submit"
+            class="rm"
+            style="margin-top: 14px;"
+            onclick="return confirm({{ 'customer.addresses.delete_confirm' | t | json }})"
+          >
+            {{ 'customer.addresses.delete' | t }}
+          </button>
+        {%- endform -%}
+      </div>
+    {%- endfor -%}
+
+    {% render 'pagination', paginate: paginate %}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Addresses",
+  "tag": "section",
+  "class": "section-addresses",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["customers/addresses"]
+  }
+}
+{% endschema %}
