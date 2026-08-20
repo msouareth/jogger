@@ -2,7 +2,8 @@
 
 ## What you received
 
-A `.zip` file containing the theme. Don't unzip it — Shopify wants the zip.
+A `.zip` file containing the theme. Upload it exactly as it arrived —
+Shopify reads the zip and unpacks it for you.
 
 ## Upload it
 
@@ -18,9 +19,8 @@ That's the recommended way to do it.
 
 ## Before it looks like the demo
 
-Jogger renders your real products, collections and menus, so a brand-new store
-shows placeholder frames rather than the demo imagery. The three things that
-make the biggest difference, in order:
+Jogger renders your own products, collections and menus, so the demo imagery is
+not part of what you install. Three things bring it to life, in order:
 
 1. **Menus** — create a menu with the handle `main-menu` for the header and one
    called `footer` for the footer (**Content → Menus**). Without these, the

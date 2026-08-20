@@ -9,8 +9,8 @@ Almost always one of three things:
 3. **No images.** Hero, tiles, editorial and lookbook images are set per section
    in the theme editor.
 
-The demo also uses specific photography. See `demo/README.md` if you bought the
-theme with the demo pack.
+The demo store also uses its own photography, which is licensed for those
+images and does not ship with the theme.
 
 ## The filter chips don't appear on collection pages
 
@@ -109,15 +109,17 @@ available to themes without custom development.
 
 ## Does it work with my apps?
 
-Product pages support app blocks — apps that provide them can be added straight
-into the product information column. Apps that inject via script tags work
-normally.
+Yes. Apps that provide **app blocks** can be placed directly into the product
+page's information column from the theme editor, so a review widget or a size
+chart sits exactly where you want it. Apps that work through script tags — email
+capture, analytics, chat, upsells — run as they do on any theme.
 
-## Is it translated?
+## Can I sell in another language?
 
-The storefront strings ship in English and are fully translatable through
-**Content → Translations** or a translation app. The theme editor's own setting
-labels are English only.
+Yes. Every piece of storefront wording runs through Shopify's translation
+system, so it can be translated in **Content → Translations** or with a
+translation app. The footer also carries country and language selectors, which
+appear automatically once you have more than one market or language enabled.
 
 ## Accessibility
 
@@ -130,6 +132,6 @@ labels are English only.
 
 ## Getting help
 
-Contact details are in your purchase receipt. When reporting a problem, the
-fastest fix comes from including: your store URL, the page it happens on, the
-browser and device, and a screenshot.
+Email **support@mundo.dev** — see [Support](support.html) for what to include.
+The fastest answers come from a message with your store URL, the page it happens
+on, the browser and device, and a screenshot.

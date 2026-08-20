@@ -12,9 +12,6 @@ A warm, modern apparel theme for Shopify.
    notes
 5. **[Support](support.html)** — how to reach us, and what to send
 
-If you also bought the demo pack, `demo/README.md` walks through standing up a
-store that matches the marketing shots.
-
 ---
 
 ## The short version

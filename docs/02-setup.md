@@ -240,8 +240,8 @@ without being chased.
 
 ## Category tiles
 
-One **Category** block per tile, each pointing at a collection. A block with no
-collection chosen does not render, so an unfinished tile leaves no gap.
+One **Category** block per tile, each pointing at a collection. A block renders
+once it has a collection, so the row stays tidy while you are still building it.
 
 **When there are more categories than columns** decides what happens once you
 have more tiles than fit across a row:
@@ -338,8 +338,8 @@ collapsible rows.
 "Information" and "Size guide" by default. Point them at your policy pages.
 
 The four collapsible rows shipped by default — Materials, Fit & sizing, Care &
-repairs, Shipping & returns — have placeholder text. Replace it, or delete the
-rows you don't want.
+repairs, Shipping & returns — come with example wording. Write your own, or
+remove the rows you do not need.
 
 ### Related products
 

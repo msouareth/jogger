@@ -1,18 +1,4 @@
-# GitHub Pages builds this folder into the documentation site that the theme
-# editor's "Documentation" button points at.
-#
-# Serving from /docs on the main branch means the docs travel with the code —
-# a change pushed here is live within about a minute, and there is no separate
-# site to keep in step with the theme.
-
 title: Jogger
 description: Documentation for the Jogger Shopify theme, by mundo.dev.
 
-# Cayman is one of the themes GitHub Pages hosts itself, so nothing has to be
-# installed or built locally. Swap it for another supported theme, or replace it
-# with your own layout later, without changing anything else here.
 theme: jekyll-theme-cayman
-
-# Keep the repository's own files out of the published site.
-exclude:
-  - README-source.md
