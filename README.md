@@ -186,7 +186,7 @@ degrades to a solid background.
 
 ## Who makes it
 
-Jogger is designed and built by **[mundo.dev](https://mundo.dev)**.
+Jogger is designed and built by **mundo.dev**.
 
 ## Licence
 
