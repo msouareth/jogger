@@ -20,7 +20,7 @@ from whichever is closest, then adjust.
 
 ## Colour schemes
 
-Mundo uses **colour schemes** rather than one flat palette. Each scheme is a set
+Jogger uses **colour schemes** rather than one flat palette. Each scheme is a set
 of five colours, and every section can be assigned a scheme — so you can run a
 dark band through the middle of a light page.
 
@@ -53,7 +53,7 @@ scheme's background, the dark steps deepen. Change the accent and badges,
 progress bars, hovers, focus rings, price colours and hero gradients all move
 together, staying in relation to each other.
 
-This is why a Mundo store recolours convincingly in about ten seconds.
+This is why a Jogger store recolours convincingly in about ten seconds.
 
 ### Using schemes per section
 

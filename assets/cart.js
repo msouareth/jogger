@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Mundo — AJAX bag
+   Jogger — AJAX bag
    Adds, quantity changes and removals go through the Cart AJAX API and
    ask for the cart-drawer section back in the same round trip, so the
    drawer, the totals and the free-shipping bar all repaint from real
@@ -8,13 +8,13 @@
 (function () {
   'use strict';
 
-  var routes = window.mundoRoutes || {};
-  var strings = window.mundoStrings || {};
-  var settings = window.mundoSettings || {};
+  var routes = window.joggerRoutes || {};
+  var strings = window.joggerStrings || {};
+  var settings = window.joggerSettings || {};
   var SECTION = 'cart-drawer';
 
   function toast(message) {
-    if (window.Mundo && window.Mundo.toast) window.Mundo.toast(message);
+    if (window.Jogger && window.Jogger.toast) window.Jogger.toast(message);
   }
 
   /* Swap every [data-cart-part] in the freshly rendered section over
@@ -34,7 +34,7 @@
     var source = parsed.querySelector('[data-cart-count]');
     if (source) updateCount(source.getAttribute('data-cart-count'));
 
-    if (window.Mundo) window.Mundo.syncWishlist(document);
+    if (window.Jogger) window.Jogger.syncWishlist(document);
   }
 
   function updateCount(count) {
@@ -90,12 +90,12 @@
 
         if (settings.cartType === 'drawer') {
           toast(strings.addedToBag);
-          if (opts.openDrawer !== false && window.Mundo) window.Mundo.openDrawer('CartDrawer');
+          if (opts.openDrawer !== false && window.Jogger) window.Jogger.openDrawer('CartDrawer');
         } else {
           window.location.href = routes.cart;
         }
 
-        document.dispatchEvent(new CustomEvent('mundo:cart:added', { detail: data }));
+        document.dispatchEvent(new CustomEvent('jogger:cart:added', { detail: data }));
         return data;
       })
       .catch(function (error) {
@@ -123,7 +123,7 @@
         // trying to patch two independent layouts from one section.
         if (document.querySelector('[data-cart-page]')) window.location.reload();
 
-        document.dispatchEvent(new CustomEvent('mundo:cart:changed', { detail: data }));
+        document.dispatchEvent(new CustomEvent('jogger:cart:changed', { detail: data }));
         return data;
       })
       .catch(function (error) {
@@ -239,7 +239,7 @@
     });
   });
 
-  window.MundoCart = {
+  window.JoggerCart = {
     add: addToCart,
     change: changeLine,
     applySection: applySection

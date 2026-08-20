@@ -5,26 +5,45 @@
       "blocks": {
         "hotspot-1": {
           "type": "hotspot",
-          "settings": { "x": 24, "y": 30 }
+          "settings": {
+            "x": 24,
+            "y": 30
+          }
         },
         "hotspot-2": {
           "type": "hotspot",
-          "settings": { "x": 49, "y": 24 }
+          "settings": {
+            "x": 49,
+            "y": 24
+          }
         },
         "hotspot-3": {
           "type": "hotspot",
-          "settings": { "x": 74, "y": 36 }
+          "settings": {
+            "x": 74,
+            "y": 36
+          }
         },
         "pill-1": {
           "type": "pill",
-          "settings": { "text": "A/W 26" }
+          "settings": {
+            "text": "A/W 26"
+          }
         },
         "pill-2": {
           "type": "pill",
-          "settings": { "text": "Shoppable" }
+          "settings": {
+            "text": "Shoppable"
+          }
         }
       },
-      "block_order": ["hotspot-1", "hotspot-2", "hotspot-3", "pill-1", "pill-2"],
+      "block_order": [
+        "hotspot-1",
+        "hotspot-2",
+        "hotspot-3",
+        "pill-1",
+        "pill-2"
+      ],
       "settings": {
         "height": 78,
         "veil": 60,
@@ -37,7 +56,7 @@
     "featured": {
       "type": "featured-products",
       "settings": {
-        "label": "01 — Just landed",
+        "label": "02 — Just landed",
         "heading": "New this week",
         "count": 4,
         "columns": 4,
@@ -49,34 +68,68 @@
       "blocks": {
         "message-1": {
           "type": "message",
-          "settings": { "text": "Named mills <em>—</em> Cariaggi cashmere" }
+          "settings": {
+            "text": "Named mills <em>—</em> Cariaggi cashmere"
+          }
         },
         "message-2": {
           "type": "message",
-          "settings": { "text": "Cut and sewn in Porto" }
+          "settings": {
+            "text": "Cut and sewn in Porto"
+          }
         },
         "message-3": {
           "type": "message",
-          "settings": { "text": "Free repairs for life" }
+          "settings": {
+            "text": "Free repairs for life"
+          }
         },
         "message-4": {
           "type": "message",
-          "settings": { "text": "Two drops a year, never a sale" }
+          "settings": {
+            "text": "Two drops a year, never a sale"
+          }
         }
       },
-      "block_order": ["message-1", "message-2", "message-3", "message-4"],
-      "settings": { "speed": 46 }
+      "block_order": [
+        "message-1",
+        "message-2",
+        "message-3",
+        "message-4"
+      ],
+      "settings": {
+        "speed": 46
+      }
     },
     "tiles": {
       "type": "category-tiles",
       "blocks": {
-        "tile-1": { "type": "tile", "settings": { "heading": "Outerwear" } },
-        "tile-2": { "type": "tile", "settings": { "heading": "Knitwear" } },
-        "tile-3": { "type": "tile", "settings": { "heading": "Dresses" } }
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "heading": "Outerwear"
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "heading": "Knitwear"
+          }
+        },
+        "tile-3": {
+          "type": "tile",
+          "settings": {
+            "heading": "Dresses"
+          }
+        }
       },
-      "block_order": ["tile-1", "tile-2", "tile-3"],
+      "block_order": [
+        "tile-1",
+        "tile-2",
+        "tile-3"
+      ],
       "settings": {
-        "label": "02 — Wardrobe",
+        "label": "01 — Wardrobe",
         "heading": "Shop by category",
         "show_counts": true
       }
@@ -94,13 +147,44 @@
     "lookbook": {
       "type": "lookbook",
       "blocks": {
-        "look-1": { "type": "look", "settings": { "caption": "Look 01 — The long coat" } },
-        "look-2": { "type": "look", "settings": { "caption": "Look 02 — Gauze & wool" } },
-        "look-3": { "type": "look", "settings": { "caption": "Look 03 — Knit dressing" } },
-        "look-4": { "type": "look", "settings": { "caption": "Look 04 — Off duty" } },
-        "look-5": { "type": "look", "settings": { "caption": "Look 05 — Evening" } }
+        "look-1": {
+          "type": "look",
+          "settings": {
+            "caption": "Look 01 — The long coat"
+          }
+        },
+        "look-2": {
+          "type": "look",
+          "settings": {
+            "caption": "Look 02 — Gauze & wool"
+          }
+        },
+        "look-3": {
+          "type": "look",
+          "settings": {
+            "caption": "Look 03 — Knit dressing"
+          }
+        },
+        "look-4": {
+          "type": "look",
+          "settings": {
+            "caption": "Look 04 — Off duty"
+          }
+        },
+        "look-5": {
+          "type": "look",
+          "settings": {
+            "caption": "Look 05 — Evening"
+          }
+        }
       },
-      "block_order": ["look-1", "look-2", "look-3", "look-4", "look-5"],
+      "block_order": [
+        "look-1",
+        "look-2",
+        "look-3",
+        "look-4",
+        "look-5"
+      ],
       "settings": {
         "label": "04 — Lookbook",
         "heading": "A/W 26 in the round",
@@ -139,9 +223,81 @@
           }
         }
       },
-      "block_order": ["value-1", "value-2", "value-3", "value-4"],
-      "settings": { "show_numbers": true }
+      "block_order": [
+        "value-1",
+        "value-2",
+        "value-3",
+        "value-4"
+      ],
+      "settings": {
+        "show_numbers": true
+      }
+    },
+    "brands": {
+      "type": "brands",
+      "blocks": {
+        "b1": {
+          "type": "brand",
+          "settings": {
+            "name": "Albini"
+          }
+        },
+        "b2": {
+          "type": "brand",
+          "settings": {
+            "name": "Cariaggi"
+          }
+        },
+        "b3": {
+          "type": "brand",
+          "settings": {
+            "name": "Lanificio"
+          }
+        },
+        "b4": {
+          "type": "brand",
+          "settings": {
+            "name": "Tessitura"
+          }
+        },
+        "b5": {
+          "type": "brand",
+          "settings": {
+            "name": "Filatura"
+          }
+        },
+        "b6": {
+          "type": "brand",
+          "settings": {
+            "name": "Setificio"
+          }
+        }
+      },
+      "block_order": [
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6"
+      ],
+      "settings": {
+        "label": "05 — The mills",
+        "heading": "Who we work with",
+        "size": 120,
+        "fit": "contain",
+        "speed": 46
+      }
     }
   },
-  "order": ["hero", "featured", "marquee", "tiles", "editorial", "lookbook", "values"]
+  "order": [
+    "hero",
+    "tiles",
+    "marquee",
+    "featured",
+    "editorial",
+    "lookbook",
+    "values",
+    "brands"
+  ]
 }

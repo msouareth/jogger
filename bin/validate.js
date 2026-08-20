@@ -1,4 +1,4 @@
-/* Static checks for the Mundo theme: JSON validity, cross-file references,
+/* Static checks for the Jogger theme: JSON validity, cross-file references,
    translation keys, and Liquid tag balance.
 
    Complements `shopify theme check` -- run both. Usage: node bin/validate.js */

@@ -1,15 +1,16 @@
-# Mundo — documentation
+# Jogger — documentation
 
 A warm, modern apparel theme for Shopify.
 
-1. **[Installing](01-install.md)** — upload the zip, and the three things that
+1. **[Installing](01-install.html)** — upload the zip, and the three things that
    matter most before it looks right
-2. **[Setting up](02-setup.md)** — navigation, logo, home page, product pages,
+2. **[Setting up](02-setup.html)** — navigation, logo, home page, product pages,
    swatches, filters, bag, search
-3. **[Customizing the look](03-customizing.md)** — theme styles, colour schemes,
+3. **[Customizing the look](03-customizing.html)** — theme styles, colour schemes,
    typography, layout, motion, product cards
-4. **[Troubleshooting & FAQ](04-faq.md)** — the common ones, plus accessibility
+4. **[Troubleshooting & FAQ](04-faq.html)** — the common ones, plus accessibility
    notes
+5. **[Support](support.html)** — how to reach us, and what to send
 
 If you also bought the demo pack, `demo/README.md` walks through standing up a
 store that matches the marketing shots.

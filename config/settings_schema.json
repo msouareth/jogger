@@ -1,15 +1,32 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Mundo",
+    "theme_name": "Jogger",
     "theme_version": "1.6.1",
-    "theme_author": "Mundo",
-    "theme_documentation_url": "https://example.com/mundo/docs",
-    "theme_support_url": "https://example.com/mundo/support"
+    "theme_author": "Jogger",
+    "theme_documentation_url": "https://example.com/jogger/docs",
+    "theme_support_url": "https://example.com/jogger/support"
   },
   {
     "name": "t:settings.palette.name",
     "settings": [
+      {
+        "type": "select",
+        "id": "color_mode",
+        "label": "t:settings.palette.mode",
+        "info": "t:settings.palette.mode_info",
+        "options": [
+          {
+            "value": "light",
+            "label": "t:settings.palette.mode_light"
+          },
+          {
+            "value": "dark",
+            "label": "t:settings.palette.mode_dark"
+          }
+        ],
+        "default": "light"
+      },
       {
         "type": "color_scheme_group",
         "id": "color_schemes",
@@ -313,6 +330,33 @@
         "id": "cart_notes",
         "label": "t:settings.cart.notes",
         "default": false
+      },
+      {
+        "type": "select",
+        "id": "checkout_mode",
+        "label": "t:settings.cart.checkout_mode",
+        "info": "t:settings.cart.checkout_mode_info",
+        "options": [
+          {
+            "value": "shopify",
+            "label": "t:settings.cart.checkout_shopify"
+          },
+          {
+            "value": "custom",
+            "label": "t:settings.cart.checkout_custom"
+          },
+          {
+            "value": "off",
+            "label": "t:settings.cart.checkout_off"
+          }
+        ],
+        "default": "shopify"
+      },
+      {
+        "type": "url",
+        "id": "checkout_url",
+        "label": "t:settings.cart.checkout_url",
+        "info": "t:settings.cart.checkout_url_info"
       }
     ]
   },

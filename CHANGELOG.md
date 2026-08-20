@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Mundo are recorded here. Versions follow
+All notable changes to Jogger are recorded here. Versions follow
 [semantic versioning](https://semver.org): a major bump means merchants may need
 to redo some settings, a minor bump adds features safely, a patch fixes bugs.
 

@@ -163,10 +163,7 @@
     </div>
 
     <form action="{{ routes.cart_url }}" method="post">
-      <button type="submit" name="checkout" class="b b-solid">
-        {{ 'sections.cart.checkout' | t }}
-        <span class="ar">&rarr;</span>
-      </button>
+      {% render 'checkout-button', class: 'b b-solid' %}
     </form>
 
     <p class="fine">{{ 'sections.cart.taxes_note' | t }}</p>

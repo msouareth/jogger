@@ -1,0 +1,45 @@
+{%- comment -%}
+  The bag's checkout control, in whichever form the merchant's checkout setting
+  calls for.
+
+  Three destinations:
+
+  - Shopify checkout — a submit button named `checkout`, which is what Shopify's
+    cart form expects.
+  - The merchant's own order form — a real anchor, not a button wired up with
+    script. Middle-click, open-in-new-tab and "copy link" all work, and it needs
+    no JavaScript to function. Common wherever cash on delivery is collected by
+    an app rather than by Shopify.
+  - Nowhere — a demo store. Stays a button so the layout is unchanged, and
+    jogger.js intercepts it.
+
+  Accepts:
+  - class {String} classes for the control
+  - style {String} inline style, optional
+{%- endcomment -%}
+
+{%- liquid
+  assign mode = settings.checkout_mode | default: 'shopify'
+  assign form_url = settings.checkout_url
+
+  comment
+    A custom destination with no address set would strand the shopper on a dead
+    control, so it falls back to Shopify's own checkout until one is entered.
+  endcomment
+  assign use_form = false
+  if mode == 'custom' and form_url != blank
+    assign use_form = true
+  endif
+-%}
+
+{%- if use_form -%}
+  <a href="{{ form_url }}" class="{{ class }}" {% if style %}style="{{ style }}"{% endif %}>
+    {{ 'sections.cart.checkout' | t }}
+    <span class="ar">&rarr;</span>
+  </a>
+{%- else -%}
+  <button type="submit" name="checkout" class="{{ class }}" {% if style %}style="{{ style }}"{% endif %}>
+    {{ 'sections.cart.checkout' | t }}
+    <span class="ar">&rarr;</span>
+  </button>
+{%- endif -%}

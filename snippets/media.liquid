@@ -22,15 +22,34 @@
   if contain
     assign fit_class = ' media--contain'
   endif
+
+  comment
+    An animated GIF is served whole, with no srcset. Two reasons: a resized GIF
+    is a re-encode, and the theme would otherwise ask for nine of them for a
+    single frame — nine encodes of a file already heavier than the photograph
+    it replaced.
+  endcomment
+  assign is_gif = false
+  if image.src contains '.gif'
+    assign is_gif = true
+  endif
 -%}
 
+{%- comment -%}
+  The ratio travels as a custom property rather than as an inline aspect-ratio,
+  because an inline declaration cannot be answered by the stylesheet. Written
+  directly, no rule could ever adjust a frame's shape — not at a breakpoint,
+  not for a frame still holding a placeholder. As a property it stays a default
+  that any rule can override, and .media reads it in jogger.css.
+{%- endcomment -%}
 <div
   class="media{{ fit_class }}{% if class %} {{ class }}{% endif %}"
-  {% if ratio %}style="aspect-ratio: {{ ratio }};"{% endif %}
+  {% if ratio %}style="--media-ratio: {{ ratio }};"{% endif %}
 >
   {%- if image != blank -%}
     <img
-      src="{{ image | image_url: width: 940 }}"
+      src="{% if is_gif %}{{ image | image_url }}{% else %}{{ image | image_url: width: 940 }}{% endif %}"
+      {% unless is_gif %}
       srcset="{{ image | image_url: width: 165 }} 165w,
         {{ image | image_url: width: 265 }} 265w,
         {{ image | image_url: width: 360 }} 360w,
@@ -41,6 +60,7 @@
         {{ image | image_url: width: 1500 }} 1500w,
         {{ image | image_url: width: 2000 }} 2000w"
       sizes="{{ sizes_attr }}"
+      {%- endunless %}
       alt="{{ alt | default: image.alt | escape }}"
       width="{{ image.width }}"
       height="{{ image.height }}"
@@ -62,6 +82,15 @@
       decoding="async"
     >
   {%- else -%}
+    {%- comment -%}
+      No image set. The placeholder alone is easy to read as a broken theme
+      rather than an empty frame — it is faint ink on a surface tint, and on a
+      pale scheme that is very close to the page itself. So in the editor it
+      says what it is, which is where somebody is in a position to fix it.
+    {%- endcomment -%}
     {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- if request.design_mode -%}
+      <span class="media-empty">{{ 'general.media.empty' | t }}</span>
+    {%- endif -%}
   {%- endif -%}
 </div>

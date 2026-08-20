@@ -1,19 +1,29 @@
-<div class="wrap">
-  <div class="page-head">
-    <p class="crumb"><a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a></p>
+{%- comment -%}
+  The page is two things side by side: what the shop has to say, and the form
+  itself. Stacked in one narrow column the form was stranded against a wide
+  empty page, and the heading had nowhere to sit but on top of it.
+{%- endcomment -%}
+<div class="wrap contact-page">
+  <div class="contact-lede">
     <h1 class="dsp">{{ page.title | escape }}</h1>
+
+    {%- if page.content != blank -%}
+      <div class="rte contact-intro">{{ page.content }}</div>
+    {%- endif -%}
   </div>
 
-  {%- if page.content != blank -%}
-    <div class="page-body rte" style="padding-bottom: 32px;">{{ page.content }}</div>
-  {%- endif -%}
-
-  <div class="account-form" style="padding-bottom: clamp(56px, 8vw, 110px);">
-    {%- form 'contact' -%}
+  <div class="contact-panel">
+    {%- form 'contact', class: 'contact-form' -%}
+      {%- comment -%}
+        A submission reloads the page, so the outcome has to announce itself.
+        role and tabindex give it to a screen reader and let the theme move
+        focus to it, rather than leaving someone at the top of a page whose
+        only change is a line of text further down.
+      {%- endcomment -%}
       {%- if form.posted_successfully? -%}
-        <p class="form-success">{{ 'templates.contact.success' | t }}</p>
+        <p class="form-success" role="status" tabindex="-1">{{ 'templates.contact.success' | t }}</p>
       {%- elsif form.errors -%}
-        <div class="form-error">
+        <div class="form-error" role="alert" tabindex="-1">
           <ul>
             {%- for field in form.errors -%}
               <li>{{ form.errors.messages[field] }}</li>
@@ -39,17 +49,17 @@
         >
       </div>
 
-      <div class="field">
+      <div class="field field--wide">
         <label for="ContactPhone">{{ 'templates.contact.phone' | t }}</label>
         <input type="tel" id="ContactPhone" name="contact[phone]" value="{{ form.phone }}" autocomplete="tel">
       </div>
 
-      <div class="field">
+      <div class="field field--wide">
         <label for="ContactMessage">{{ 'templates.contact.message' | t }}</label>
         <textarea id="ContactMessage" name="contact[body]" required>{{ form.body }}</textarea>
       </div>
 
-      <div>
+      <div class="form-foot">
         <button type="submit" class="b b-solid">
           {{ 'templates.contact.send' | t }}
           <span class="ar">&rarr;</span>

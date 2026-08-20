@@ -39,8 +39,10 @@
       "type": "header",
       "settings": {
         "logo_type": "text",
+        "logo_text": "Jogger",
         "logo_width": 110,
-        "logo_gap": 88,
+        "gap_left": 90,
+        "gap_right": 90,
         "menu": "main-menu",
         "show_search": true,
         "show_account": true

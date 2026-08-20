@@ -1,13 +1,22 @@
 {%- liquid
   assign hero_image = section.settings.image
+  assign hero_video = section.settings.video
 
   comment
-    Whole-image mode gives the frame the picture's own proportions instead of a
-    fixed height, so filling it crops nothing. It needs a real image to take a
-    ratio from — the placeholder has none, so the fixed height stands in.
+    Whole-image mode gives the frame the media's own proportions instead of a
+    fixed height, so filling it crops nothing. It needs real media to take a
+    ratio from — the placeholder has none, so the fixed height stands in. A
+    video carries its own aspect ratio and answers here just as an image does.
   endcomment
+  assign hero_ratio = blank
+  if hero_video != blank
+    assign hero_ratio = hero_video.aspect_ratio
+  elsif hero_image != blank
+    assign hero_ratio = hero_image.aspect_ratio
+  endif
+
   assign whole = false
-  if section.settings.image_fit == 'whole' and hero_image != blank
+  if section.settings.image_fit == 'whole' and hero_ratio != blank
     assign whole = true
   endif
 
@@ -25,23 +34,65 @@
   if whole
     assign frame_class = 'hero-frame hero-frame--whole'
   endif
+
+  comment
+    Two independent choices about how the picture sits on the page: whether it
+    runs up under the bar, and whether it keeps the page's side margins or goes
+    edge to edge.
+  endcomment
+  assign hero_class = 'hero'
+  if section.settings.under_header
+    assign hero_class = hero_class | append: ' hero--under'
+  endif
+  if section.settings.full_bleed
+    assign hero_class = hero_class | append: ' hero--bleed'
+  endif
 -%}
 
 <div class="scheme color-{{ section.settings.color_scheme }}">
-<div class="hero">
+<div class="{{ hero_class }}">
   <div
     class="{{ frame_class }}"
-    style="--hero-height: {{ section.settings.height }}vh; --veil: {{ section.settings.veil | divided_by: 100.0 }};{% if whole %} --hero-ratio: {{ hero_image.aspect_ratio }};{% endif %}"
+    style="--hero-height: {{ section.settings.height }}vh; --veil: {{ section.settings.veil | divided_by: 100.0 }};{% if whole %} --hero-ratio: {{ hero_ratio }};{% endif %}"
   >
-    {% render 'media',
-      image: section.settings.image,
-      class: drift,
-      sizes: '100vw',
-      loading: 'eager',
-      fetchpriority: 'high',
-      placeholder: 'lifestyle-1',
-      alt: section.settings.image_alt
-    %}
+    {%- comment -%}
+      A video takes the frame when one is set, and the image becomes its poster
+      — the still a visitor sees while the file loads, and what they keep if the
+      browser refuses to autoplay. Setting both is the good case, not a clash.
+
+      Muted and playsinline are not decoration: without muted, no browser will
+      autoplay at all, and without playsinline iOS takes the video fullscreen
+      the moment it starts. No controls, because this is a backdrop that other
+      things are laid over, not something to operate.
+
+      An animated GIF needs none of this — it goes in the image picker and the
+      media snippet leaves it whole.
+    {%- endcomment -%}
+    {%- if hero_video != blank -%}
+      <div class="media hero-media{{ drift }}">
+        {{
+          hero_video
+          | video_tag:
+            image_size: '1600x',
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            poster: section.settings.image
+        }}
+      </div>
+    {%- else -%}
+      {% render 'media',
+        image: section.settings.image,
+        class: drift,
+        sizes: '100vw',
+        loading: 'eager',
+        fetchpriority: 'high',
+        placeholder: 'lifestyle-1',
+        alt: section.settings.image_alt
+      %}
+    {%- endif -%}
 
     <div class="hero-veil"></div>
 
@@ -69,7 +120,28 @@
 
     {%- assign pill_blocks = section.blocks | where: 'type', 'pill' -%}
     {%- if pill_blocks.size > 0 -%}
-      <div class="hero-side">
+      {%- liquid
+        comment
+          Placed the same way as the text below, and by the same reasoning: the
+          two axes are independent, so each adds its own class and the defaults
+          — the top right corner — add nothing.
+        endcomment
+        assign side_class = 'hero-side'
+
+        assign pill_pos = section.settings.pill_position | default: 'right'
+        unless pill_pos == 'right'
+          assign side_class = side_class | append: ' hero-side--' | append: pill_pos
+        endunless
+
+        assign pill_v = section.settings.pill_vertical | default: 'top'
+        unless pill_v == 'top'
+          assign side_class = side_class | append: ' hero-side--v-' | append: pill_v
+        endunless
+      -%}
+      <div
+        class="{{ side_class }}"
+        style="--hero-pill-x: {{ section.settings.pill_inset_x | default: 44 }}px; --hero-pill-y: {{ section.settings.pill_inset_y | default: 44 }}px;"
+      >
         {%- for block in pill_blocks -%}
           <span class="pill" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</span>
         {%- endfor -%}
@@ -82,7 +154,27 @@
     {%- capture button_style %}{% render 'text-style', s: section.settings, key: 'button' %}{% endcapture -%}
     {%- capture button_colors %}{% render 'button-style', s: section.settings, key: 'button' %}{% endcapture -%}
 
-    <div class="hero-card">
+    {%- liquid
+      comment
+        Across and down are independent, so the two settings each add their own
+        class and the defaults — left, and at the foot — add nothing.
+      endcomment
+      assign card_class = 'hero-card'
+
+      assign text_pos = section.settings.text_position | default: 'left'
+      unless text_pos == 'left'
+        assign card_class = card_class | append: ' hero-card--' | append: text_pos
+      endunless
+
+      assign text_v = section.settings.text_vertical | default: 'bottom'
+      unless text_v == 'bottom'
+        assign card_class = card_class | append: ' hero-card--v-' | append: text_v
+      endunless
+    -%}
+    <div
+      class="{{ card_class }}"
+      style="--hero-card-w: {{ section.settings.text_width | default: 520 }}px; --hero-inset-x: {{ section.settings.text_inset_x | default: 44 }}px; --hero-inset-y: {{ section.settings.text_inset_y | default: 44 }}px;"
+    >
       {%- if section.settings.label != blank -%}
         <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
       {%- endif -%}
@@ -106,6 +198,39 @@
         </a>
       {%- endif -%}
     </div>
+
+    {%- comment -%}
+      Last in the frame so it sits over the text rather than under it, and a
+      real button rather than a decorated div: clicking it travels to whatever
+      section follows the hero, which is the thing it is telling you to do.
+
+      No wording — the movement carries the meaning. The chevrons are drawn
+      from borders rather than set as characters, so nothing here is text: the
+      accessible name comes from the label instead, which is why the control
+      still announces itself to anyone who cannot see it move.
+    {%- endcomment -%}
+    {%- liquid
+      assign cue = section.settings.scroll_cue | default: 'centre'
+      assign cue_class = 'hero-cue hero-cue--' | append: cue
+
+      comment
+        Shown on phones unless told otherwise, so the default adds nothing and
+        only the narrower choice carries a class.
+      endcomment
+      if section.settings.scroll_cue_phone == false
+        assign cue_class = cue_class | append: ' hero-cue--wide'
+      endif
+    -%}
+    {%- unless cue == 'off' -%}
+      <button
+        type="button"
+        class="{{ cue_class }}"
+        data-hero-cue
+        aria-label="{{ 'sections.hero.scroll' | t }}"
+      >
+        <span class="hero-cue-arrows" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    {%- endunless -%}
   </div>
 </div>
 </div>
@@ -126,7 +251,14 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Image",
+      "info": "Also accepts an animated GIF — it is left whole rather than resized, so it keeps moving."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video",
+      "info": "Takes the place of the image when set. Plays silently on a loop with no controls, and the image above becomes its poster — the still shown while it loads, and what a visitor keeps if their browser or their reduced-motion setting blocks autoplay. Keep it short and light; it is the first thing that loads."
     },
     {
       "type": "text",
@@ -135,13 +267,33 @@
       "info": "Describes the image for screen readers and when the image fails to load."
     },
     {
+      "type": "checkbox",
+      "id": "under_header",
+      "label": "Run up under the bar",
+      "info": "The picture starts at the very top of the page and the header floats over it. The header's labels turn light and the top of the picture is shaded so they stay readable, returning to normal once the bar sticks on scroll. Only sensible on a template that opens with this section.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "full_bleed",
+      "label": "Full width",
+      "info": "Takes the picture edge to edge instead of leaving the page's side margins. Corners are squared off, since a rounded corner against the screen edge reads as a mistake.",
+      "default": false
+    },
+    {
       "type": "select",
       "id": "image_fit",
       "label": "Image",
       "info": "Filling the frame keeps the hero the same height on every screen, and crops the picture to fit — a wide screen crops more off the top and bottom than a narrow one. Showing the whole picture instead gives the frame the picture's own proportions, so nothing is cropped, but the hero's height then changes with the shape of the image you upload and the Height setting no longer applies. The slow zoom is also turned off, since it is a crop.",
       "options": [
-        { "value": "fill", "label": "Fill the frame (crops to fit)" },
-        { "value": "whole", "label": "Show the whole picture" }
+        {
+          "value": "fill",
+          "label": "Fill the frame (crops to fit)"
+        },
+        {
+          "value": "whole",
+          "label": "Show the whole picture"
+        }
       ],
       "default": "fill"
     },
@@ -149,9 +301,9 @@
       "type": "range",
       "id": "height",
       "label": "Height",
-      "info": "As a share of the screen height, clamped between 460 and 820px. Only applies when the image fills the frame.",
+      "info": "As a share of the screen height. 100% fills the screen. Never shrinks below 460px, so the picture keeps some presence on a short laptop. Only applies when the image fills the frame — showing the whole picture takes its height from the picture instead.",
       "min": 50,
-      "max": 95,
+      "max": 100,
       "step": 1,
       "unit": "%",
       "default": 78
@@ -168,8 +320,111 @@
       "default": 60
     },
     {
+      "type": "select",
+      "id": "scroll_cue",
+      "label": "Scroll cue",
+      "info": "A pair of chevrons at the foot of the picture, telling a visitor there is more below. They fade away as soon as anyone scrolls, and clicking travels to the next section. Put them to one side if your hero text also sits at the foot and centred, so the two do not crowd.",
+      "options": [
+        {
+          "value": "centre",
+          "label": "Centred"
+        },
+        {
+          "value": "right",
+          "label": "To one side"
+        },
+        {
+          "value": "off",
+          "label": "Hidden"
+        }
+      ],
+      "default": "centre"
+    },
+    {
+      "type": "checkbox",
+      "id": "scroll_cue_phone",
+      "label": "Show the cue on phones",
+      "info": "On a narrow screen the hero text runs the full width, so text sitting at the foot is lifted to make room for the chevrons. Turn this off to keep the cue on wider screens only.",
+      "default": true
+    },
+    {
       "type": "header",
       "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position — across",
+      "info": "Which side of the picture the label, heading, body and button settle against.",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "text_inset_x",
+      "label": "Distance from the sides",
+      "info": "How far the text sits from the left and right edges of the picture. Has no effect while the text is centred across — there is no side for it to sit away from. On a narrow picture it is held to a fifth of the width, so a roomy desktop setting still leaves something to read on a phone.",
+      "min": 8,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "text_inset_y",
+      "label": "Distance from top and bottom",
+      "info": "How far the text sits from the top or foot of the picture. Has no effect while the text is in the middle. On a short picture it is held to a third of the height, so the text cannot be pushed out of the frame.",
+      "min": 8,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "text_width",
+      "label": "Text width",
+      "info": "How wide the text block may run before it wraps. Widen it to keep a large heading on one line. The body paragraph keeps its own readable measure whatever this is set to, so a wide block gives the heading room without stretching the body into long lines. Never exceeds the picture's width, so it still wraps on a phone.",
+      "min": 280,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "select",
+      "id": "text_vertical",
+      "label": "Text position — down",
+      "info": "How high up the picture the text sits. Independent of the side, so it can be centred across and still sit at the foot.",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "middle",
+          "label": "Middle"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "bottom"
     },
     {
       "type": "text",
@@ -200,6 +455,78 @@
       "type": "url",
       "id": "button_link",
       "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Pills"
+    },
+    {
+      "type": "paragraph",
+      "content": "The small round captions. Add or remove them in the blocks below; these place them on the picture."
+    },
+    {
+      "type": "select",
+      "id": "pill_position",
+      "label": "Pill position — across",
+      "info": "Which side of the picture the pills settle against. They stay side by side whichever you pick.",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "select",
+      "id": "pill_vertical",
+      "label": "Pill position — down",
+      "info": "How high up the picture the pills sit. Independent of the side, so they can be centred across and still sit at the foot.",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "middle",
+          "label": "Middle"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "range",
+      "id": "pill_inset_x",
+      "label": "Distance from the sides",
+      "info": "How far the pills sit from the left and right edges of the picture. Has no effect while they are centred across. On a narrow picture it is held to a fifth of the width.",
+      "min": 8,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "pill_inset_y",
+      "label": "Distance from top and bottom",
+      "info": "How far the pills sit from the top or foot of the picture. Has no effect while they are in the middle. On a short picture it is held to a third of the height.",
+      "min": 8,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 44
     },
     {
       "type": "header",

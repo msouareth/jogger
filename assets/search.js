@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Mundo — predictive search
+   Jogger — predictive search
    Results are rendered by sections/predictive-search.liquid so the
    suggestion cards match the product cards everywhere else, and arrow
    keys walk the list the way a native combobox does.
@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var routes = window.mundoRoutes || {};
+  var routes = window.joggerRoutes || {};
 
   class PredictiveSearch extends HTMLElement {
     connectedCallback() {

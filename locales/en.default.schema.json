@@ -2,6 +2,10 @@
   "settings": {
     "palette": {
       "name": "Colours",
+      "mode": "Colour mode",
+      "mode_info": "Dark turns the whole shop over: every colour scheme swaps its ground and its text, and the accent is lifted so it still carries. The colours below stay exactly as you set them — this chooses which way up they are used.",
+      "mode_light": "Light",
+      "mode_dark": "Dark",
       "ground": "Ground",
       "background": "Page background",
       "surface": "Surface",
@@ -71,7 +75,14 @@
       "free_shipping_bar": "Show free shipping progress",
       "threshold": "Free shipping threshold",
       "threshold_info": "In your store's currency, without a symbol. For example 150.",
-      "notes": "Allow order notes"
+      "notes": "Allow order notes",
+      "checkout_mode": "Where the buy buttons go",
+      "checkout_mode_info": "Applies to Checkout in the bag and Buy it now on the product page.",
+      "checkout_shopify": "Shopify checkout",
+      "checkout_custom": "My own order form",
+      "checkout_off": "Nowhere — demo store",
+      "checkout_url": "Order form address",
+      "checkout_url_info": "Used when the buy buttons point at your own order form. Pick the page your order form app created, or paste its address. Shoppers go straight there instead of to Shopify checkout, so the app collects their details rather than Shopify."
     },
     "search": {
       "name": "Search",

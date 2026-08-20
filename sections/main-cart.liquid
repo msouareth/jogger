@@ -101,10 +101,7 @@
             <b>{{ cart.total_price | money_with_currency }}</b>
           </div>
 
-          <button type="submit" name="checkout" class="b b-solid" style="width: 100%; justify-content: space-between;">
-            {{ 'sections.cart.checkout' | t }}
-            <span class="ar">&rarr;</span>
-          </button>
+          {% render 'checkout-button', class: 'b b-solid', style: 'width: 100%; justify-content: space-between;' %}
 
         <p class="fine">{{ 'sections.cart.taxes_note' | t }}</p>
       </div>

@@ -1,6 +1,6 @@
 # Demo store setup
 
-Everything needed to stand up the store shown in the Mundo marketing shots.
+Everything needed to stand up the store shown in the Jogger marketing shots.
 Budget about 30 minutes. The imagery is generated for you in step 1, so most of
 that is clicking through the Shopify admin rather than waiting on uploads.
 

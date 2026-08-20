@@ -63,13 +63,48 @@
             </a>
 
             {%- for filter in list_filters -%}
+              {%- liquid
+                comment
+                  Availability is the one filter whose values exclude each other.
+                  Ticking both "In stock" and "Out of stock" asks for everything,
+                  which is what the All chip already does — so the row would be
+                  offering a state that means nothing. Picking one here replaces
+                  the other rather than adding to it.
+
+                  Every other list filter stays additive, because Outerwear plus
+                  Knitwear is a real and useful request.
+
+                  filter.url_to_remove clears this filter alone and keeps the
+                  sort and any other filters, which is exactly the base to hang
+                  the newly chosen value off.
+                endcomment
+                assign exclusive = false
+                if filter.param_name contains 'availability'
+                  assign exclusive = true
+                endif
+
+                assign group_base = filter.url_to_remove
+                assign group_sep = '?'
+                if group_base contains '?'
+                  assign group_sep = '&'
+                endif
+              -%}
               {%- for value in filter.values -%}
                 {%- if value.count == 0 and value.active == false -%}
                   {%- continue -%}
                 {%- endif -%}
+                {%- liquid
+                  assign chip_url = value.url_to_add
+                  if value.active
+                    assign chip_url = value.url_to_remove
+                  elsif exclusive
+                    assign encoded = value.value | url_encode
+                    assign chip_url = group_base | append: group_sep | append: value.param_name | append: '=' | append: encoded
+                  endif
+                -%}
                 <a
                   class="chip"
-                  href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                  href="{{ chip_url }}"
                   {% if value.active %}data-on aria-current="true"{% endif %}
                 >
                   {{ value.label | escape }}

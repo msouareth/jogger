@@ -3,7 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="{{ settings.color_schemes.first.settings.background }}">
+    {%- comment -%}
+      The tint a phone paints its browser chrome with, so it meets the page
+      rather than fighting it. In dark mode the ground is the scheme's text
+      colour, the two having traded places.
+    {%- endcomment -%}
+    <meta name="theme-color" content="{% if settings.color_mode == 'dark' %}{{ settings.color_schemes.first.settings.text }}{% else %}{{ settings.color_schemes.first.settings.background }}{% endif %}">
     <link rel="canonical" href="{{ canonical_url }}">
 
     {%- if settings.favicon != blank -%}
@@ -52,7 +57,7 @@
       {% render 'css-variables' %}
     {% endstyle %}
 
-    {{ 'mundo.css' | asset_url | stylesheet_tag }}
+    {{ 'jogger.css' | asset_url | stylesheet_tag }}
 
     {%- unless settings.type_body_font.system? -%}
       {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
@@ -60,14 +65,14 @@
 
     <script>
       document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-      window.mundoRoutes = {
+      window.joggerRoutes = {
         cart_add: '{{ routes.cart_add_url }}',
         cart_change: '{{ routes.cart_change_url }}',
         cart_update: '{{ routes.cart_update_url }}',
         cart: '{{ routes.cart_url }}',
         predictive_search: '{{ routes.predictive_search_url }}'
       };
-      window.mundoStrings = {
+      window.joggerStrings = {
         addedToBag: {{ 'sections.cart.added' | t | json }},
         cartError: {{ 'sections.cart.error' | t | json }},
         signupThanks: {{ 'sections.newsletter.success' | t | json }},
@@ -75,16 +80,19 @@
         unavailable: {{ 'products.product.unavailable' | t | json }},
         addToBag: {{ 'products.product.add_to_bag' | t | json }},
         saved: {{ 'products.product.saved' | t | json }},
-        removedFromSaved: {{ 'products.product.removed_from_saved' | t | json }}
+        removedFromSaved: {{ 'products.product.removed_from_saved' | t | json }},
+        demoCheckout: {{ 'general.demo_checkout' | t | json }}
       };
-      window.mundoSettings = {
+      window.joggerSettings = {
         cartType: {{ settings.cart_type | json }},
         reveal: {{ settings.motion_reveal | json }},
-        parallax: {{ settings.motion_parallax | json }}
+        parallax: {{ settings.motion_parallax | json }},
+        checkoutMode: {{ settings.checkout_mode | default: 'shopify' | json }},
+        checkoutUrl: {{ settings.checkout_url | default: '' | json }}
       };
     </script>
 
-    <script src="{{ 'mundo.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'jogger.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
     {%- if request.page_type == 'product' or request.page_type == 'index' or request.page_type == 'collection' -%}
       <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>

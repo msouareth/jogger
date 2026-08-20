@@ -5,18 +5,27 @@
 -%}
 
 {%- comment -%}
-  The default guards against a stored header whose settings predate this one.
-  An empty value would emit "--hdr-gap: px", and an invalid custom property
-  makes the whole gap declaration compute to its initial value — the spacing
-  would collapse and the control would appear to do nothing at all.
+  The bar is three groups — menu, wordmark, tools — and the layout setting
+  decides the order they sit in. They are captured first and printed in that
+  order below, rather than reordered with CSS, so the source order always
+  matches what is on screen and tab order follows the eye.
+
+  The defaults on the two spacing values guard against a stored header whose
+  settings predate them. An empty value would emit "--hdr-gap-left: px", and an
+  invalid custom property makes the whole declaration compute to its initial
+  value — the spacing would collapse and the control would appear to do nothing.
 {%- endcomment -%}
-<header class="hdr" id="SiteHeader" style="--hdr-gap: {{ section.settings.logo_gap | default: 88 }}px;">
-  {%- comment -%}
-    Three columns: menu, wordmark, tools. The side columns are equal so the
-    wordmark sits on the true centre of the bar; the menu holds the left edge
-    and the icons the right. Source order matches the visual order left to
-    right, which keeps tab order honest.
-  {%- endcomment -%}
+{%- liquid
+  comment
+    The layout class is always written, the centred one included, so every
+    layout's rules can be written the same way round instead of one of them
+    having to be expressed as "not the others".
+  endcomment
+  assign layout = section.settings.layout | default: 'centre'
+  assign hdr_class = 'hdr hdr--logo-' | append: layout
+-%}
+
+{%- capture group_menu -%}
   <div class="hside hside--left">
     <button
       type="button"
@@ -50,6 +59,7 @@
       </ul>
     </nav>
   </div>
+{%- endcapture -%}
 
   {%- comment -%}
     Image or wordmark is an explicit choice rather than "an image if one was
@@ -97,15 +107,23 @@
   {%- endcapture -%}
 
   {%- comment -%}
-    The wordmark is the page's h1 on the home page only; every other
-    template has a heading of its own.
-  {%- endcomment -%}
-  {%- if request.page_type == 'index' -%}
-    <h1 style="margin: 0; display: contents;">{{ logo_mark }}</h1>
-  {%- else -%}
-    {{ logo_mark }}
-  {%- endif -%}
+    The wordmark is the page's h1 on the home page only; every other template
+    has a heading of its own. Either way it gets the same real wrapper.
 
+    It used to be an h1 with display:contents on the home page and no wrapper
+    at all elsewhere, which meant the group in this slot was sometimes a box and
+    sometimes not. A box that is not there cannot take a margin, so the spacing
+    settings silently did nothing whenever the wordmark sat at an end of the bar.
+  {%- endcomment -%}
+  {%- capture group_logo -%}
+    {%- if request.page_type == 'index' -%}
+      <h1 class="hlogo">{{ logo_mark }}</h1>
+    {%- else -%}
+      <div class="hlogo">{{ logo_mark }}</div>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture group_tools -%}
   <div class="hside hside--right">
     {%- comment -%}
       The tools read as icons, so each carries its label in a visually hidden
@@ -150,6 +168,55 @@
       {%- endif -%}
     </div>
   </div>
+{%- endcapture -%}
+
+
+{%- comment -%}
+  Only the colours actually chosen are written out. An empty colour setting
+  renders as nothing, and `--hdr-ink-set: ;` is not the same as leaving the
+  property alone: an empty token stream is a valid custom property value, so
+  var() would take it instead of its fallback and every rule reading it would
+  collapse. Emitting a property only when there is a colour to put in it leaves
+  the stylesheet's fallbacks doing their job.
+{%- endcomment -%}
+{%- liquid
+  assign ink = ''
+
+  if section.settings.ink != blank
+    assign ink = ink | append: '--hdr-ink-set:' | append: section.settings.ink | append: ';'
+  endif
+
+  if section.settings.ink_hover != blank
+    assign ink = ink | append: '--hdr-ink-hover:' | append: section.settings.ink_hover | append: ';'
+  endif
+
+  if section.settings.ink_current != blank
+    assign ink = ink | append: '--hdr-ink-current:' | append: section.settings.ink_current | append: ';'
+  endif
+
+  if section.settings.ink_over != blank
+    assign ink = ink | append: '--hdr-ink-over:' | append: section.settings.ink_over | append: ';'
+  endif
+-%}
+<header
+  class="{{ hdr_class }}"
+  id="SiteHeader"
+  data-stick="{{ section.settings.stick | default: 'hero' }}"
+  style="--hdr-gap-left: {{ section.settings.gap_left | default: 90 }}px; --hdr-gap-right: {{ section.settings.gap_right | default: 90 }}px;{{ ink }}"
+>
+  {%- comment -%}
+    The middle slot is the centred one. The wordmark takes it when it is
+    centred; otherwise the menu does, and the icons take whichever side the
+    wordmark left free.
+  {%- endcomment -%}
+  {%- case layout -%}
+    {%- when 'left' -%}
+      {{ group_logo }}{{ group_menu }}{{ group_tools }}
+    {%- when 'right' -%}
+      {{ group_tools }}{{ group_menu }}{{ group_logo }}
+    {%- else -%}
+      {{ group_menu }}{{ group_logo }}{{ group_tools }}
+  {%- endcase -%}
 </header>
 
 {%- comment -%} Mobile navigation {%- endcomment -%}
@@ -271,8 +338,14 @@
       "id": "logo_type",
       "label": "Logo",
       "options": [
-        { "value": "text", "label": "Wordmark (text)" },
-        { "value": "image", "label": "Image" }
+        {
+          "value": "text",
+          "label": "Wordmark (text)"
+        },
+        {
+          "value": "image",
+          "label": "Image"
+        }
       ],
       "default": "image",
       "info": "Image falls back to the wordmark when no file is set, so the header is never blank. That fallback is also why Image is the default — a store that already had a logo uploaded keeps showing it after an update rather than reverting to text."
@@ -321,10 +394,22 @@
       "label": "Font",
       "info": "The three fonts themselves are set in Theme settings, so the wordmark stays part of the same type system as the rest of the theme.",
       "options": [
-        { "value": "default", "label": "Default" },
-        { "value": "heading", "label": "Heading font" },
-        { "value": "body", "label": "Body font" },
-        { "value": "accent", "label": "Accent font" }
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
       ],
       "default": "default"
     },
@@ -346,15 +431,95 @@
       "info": "Leave empty to follow the colour scheme."
     },
     {
+      "type": "header",
+      "content": "Bar colours"
+    },
+    {
+      "type": "paragraph",
+      "content": "Applies to the menu links, the search, account and bag icons, the menu button, and the wordmark. Leave any of them empty to follow the colour scheme, which is the safe choice: a colour set here is used everywhere, including where the bar sits on the page's own background. If you want light labels only while the bar floats over a hero picture, use the last setting in this group rather than this one. A colour set on the wordmark itself, above, wins over these."
+    },
+    {
+      "type": "color",
+      "id": "ink",
+      "label": "Menu, icons and wordmark"
+    },
+    {
+      "type": "color",
+      "id": "ink_hover",
+      "label": "On hover",
+      "info": "Also colours the line that sweeps in under a link. Empty means hover keeps the colour above and only brightens."
+    },
+    {
+      "type": "color",
+      "id": "ink_current",
+      "label": "Current page",
+      "info": "The link for the page a visitor is already on. Empty follows the scheme's accent colour."
+    },
+    {
+      "type": "color",
+      "id": "ink_over",
+      "label": "Over a hero picture",
+      "info": "Used only while the bar is floating over a hero set to run under it, before the visitor scrolls. Empty means white, which is what carries over a photograph."
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Bar layout",
+      "info": "Where the wordmark sits. The menu and the icons take the other two places around it.",
+      "options": [
+        {
+          "value": "left",
+          "label": "Logo left · menu centred · icons"
+        },
+        {
+          "value": "centre",
+          "label": "Menu · logo centred · icons"
+        },
+        {
+          "value": "right",
+          "label": "Icons · menu centred · logo right"
+        }
+      ],
+      "default": "centre"
+    },
+    {
+      "type": "select",
+      "id": "stick",
+      "label": "When the bar takes its background",
+      "info": "While a hero is set to run up under the bar, the bar is clear and its text is light so the picture shows through. This decides when that ends. Waiting for the picture keeps it clear for as long as there is something behind it worth seeing; the other option turns it solid the moment the page moves.",
+      "options": [
+        {
+          "value": "hero",
+          "label": "Once the picture has passed"
+        },
+        {
+          "value": "page",
+          "label": "As soon as the page moves"
+        }
+      ],
+      "default": "hero"
+    },
+    {
       "type": "range",
-      "id": "logo_gap",
-      "label": "Space around wordmark",
-      "info": "The air between the wordmark and the menu and icons either side of it, in pixels, exactly as set. Narrow screens ease it back so the icons never crowd the wordmark. A wide setting leaves the menu less room, so a long menu folds into the drawer sooner — at the top of this range expect the drawer on most screens.",
-      "min": 24,
-      "max": 300,
-      "step": 4,
+      "id": "gap_left",
+      "label": "Space on the left of centre",
+      "info": "The air between the centred group — the wordmark, or the menu when the wordmark is at an end — and whatever sits to its left. In pixels, exactly as set. Narrow screens ease it back so nothing crowds.",
+      "min": 20,
+      "max": 750,
+      "step": 10,
       "unit": "px",
-      "default": 88
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "gap_right",
+      "label": "Space on the right of centre",
+      "info": "The same on the other side. The two can differ — the centred group stays on the centre of the bar either way, so uneven values give it uneven air rather than pushing it off centre. Wide settings leave the menu less room, so a long menu folds into the drawer sooner.",
+      "min": 20,
+      "max": 750,
+      "step": 10,
+      "unit": "px",
+      "default": 90
     },
     {
       "type": "link_list",
@@ -376,7 +541,9 @@
     }
   ],
   "enabled_on": {
-    "groups": ["header"]
+    "groups": [
+      "header"
+    ]
   }
 }
 {% endschema %}

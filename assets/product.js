@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Mundo — variant picker
+   Jogger — variant picker
    Option inputs update the hidden variant id and the disabled state
    immediately so the UI never feels laggy, then the product section is
    re-rendered server-side to repaint price, badges and inventory. That
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  var strings = window.mundoStrings || {};
+  var strings = window.joggerStrings || {};
 
   class VariantPicker extends HTMLElement {
     connectedCallback() {
@@ -142,8 +142,8 @@
       // the image into view instead.
       if (shot.hasAttribute('data-slide')) {
         var gallery = shot.closest('[data-gallery]');
-        if (gallery && gallery.mundoGallery) {
-          gallery.mundoGallery.show(Number(shot.getAttribute('data-slide')));
+        if (gallery && gallery.joggerGallery) {
+          gallery.joggerGallery.show(Number(shot.getAttribute('data-slide')));
           return;
         }
       }
@@ -182,7 +182,7 @@
      One stage, crossfading slides, driven by the arrows, the thumbnail
      strip, arrow keys, or the variant picker. */
   function buildGallery(root) {
-    if (root.mundoGallery) return;
+    if (root.joggerGallery) return;
 
     var slides = Array.prototype.slice.call(root.querySelectorAll('[data-slide]'));
     var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-gallery-thumb]'));
@@ -232,7 +232,7 @@
       startX = null;
     }, { passive: true });
 
-    root.mundoGallery = { show: show };
+    root.joggerGallery = { show: show };
     show(0);
   }
 
@@ -267,7 +267,7 @@
         if (!fresh || !fresh.innerHTML.trim()) return;
 
         host.innerHTML = fresh.innerHTML;
-        if (window.Mundo) window.Mundo.init(host);
+        if (window.Jogger) window.Jogger.init(host);
       })
       .catch(function () {
         /* no recommendations is a fine outcome — the section stays empty */

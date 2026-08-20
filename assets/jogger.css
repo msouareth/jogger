@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Mundo — warm modern apparel theme
+   Jogger — warm modern apparel theme
    Architectural bones: visible grid, flush-left labels, light weights,
    a warm sand ground and a camel accent. Motion throughout: scroll
    reveals, a drifting hero, shoppable hotspots and soft crossfades.
@@ -116,10 +116,17 @@ a {
   display: block;
   overflow: hidden;
   background: var(--color-surface);
+
+  /* The shape a caller asked for, if it asked for one. Unset resolves to auto,
+     which is the initial value, so a frame sized by its parent is unaffected. */
+  aspect-ratio: var(--media-ratio, auto);
 }
 
+/* Video is listed alongside img so a frame treats the two identically — same
+   crop, same ratio lock, same behaviour in every section that uses .media. */
 .media > img,
-.media > svg {
+.media > svg,
+.media > video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -128,13 +135,33 @@ a {
   display: block;
 }
 
-.media--contain > img {
+.media--contain > img,
+.media--contain > video {
   object-fit: contain;
 }
 
 .media .placeholder-svg {
   fill: rgba(var(--color-text-rgb), 0.12);
   background: var(--color-surface);
+}
+
+/* The "no image yet" note, seen only in the theme editor. Sits over the
+   placeholder rather than beside it, so it needs no room in the layout and the
+   frame keeps the proportions the finished picture will have. */
+.media-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 28px);
+  padding: 8px 14px;
+  border-radius: var(--r);
+  background: rgba(var(--color-bg-rgb), 0.92);
+  color: var(--ink-80);
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
 }
 
 /* ── type ── */
@@ -413,19 +440,29 @@ a {
   transform: none;
 }
 
-.rv-img {
+/* The clip sits on the figure's contents, never on the figure itself.
+
+   An element clipped to zero area can stop reporting its own intersection, and
+   this is the element the observer is watching — so the thing hiding the
+   picture was preventing the thing that would reveal it. It waits for a signal
+   it has made impossible to send, and the picture stays clipped away for good.
+   The wrapper stays unclipped and observable; only what is inside it is hidden,
+   which looks identical and cannot deadlock. */
+.rv-img > * {
   clip-path: inset(0 0 100% 0);
   transition: clip-path 1.1s var(--slow);
 }
 
-.rv-img.in {
+.rv-img.in > * {
   clip-path: inset(0 0 0 0);
 }
 
 .no-js .rv,
 .no-js .rv-img,
 .motion-off .rv,
-.motion-off .rv-img {
+.motion-off .rv-img,
+.no-js .rv-img > *,
+.motion-off .rv-img > * {
   opacity: 1;
   transform: none;
   clip-path: none;
@@ -437,7 +474,8 @@ a {
   }
 
   .rv,
-  .rv-img {
+  .rv-img,
+  .rv-img > * {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
@@ -448,6 +486,14 @@ a {
   .tick-run,
   .spot::before {
     animation: none !important;
+  }
+
+  /* The chevrons stop falling and simply stand there, still pointing down.
+     The turn has to be restated, since it lived only in the keyframes. */
+  .hero-cue-arrows i {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: rotate(45deg) !important;
   }
 
   /* The drift is stopped above, so its overscan is now just a tighter crop for
@@ -509,7 +555,20 @@ a {
    under it. --hdr-ink is the single source every label and icon in the bar
    colours from. */
 .hdr {
-  --hdr-ink: var(--color-text);
+  /* The bar's four colours, each a merchant setting with the theme's own
+     choice as its fallback, so an untouched header looks exactly as before.
+
+     The setting lands on --hdr-ink-set rather than on --hdr-ink itself, and
+     that step matters. The section writes these as inline custom properties,
+     and an inline declaration beats any stylesheet rule on the same element —
+     written straight onto --hdr-ink it would also beat the rule further down
+     that turns the ink white while the bar floats over a hero picture, so
+     choosing a colour would quietly cost the merchant that legibility. Kept
+     apart, both rules still work: the choice feeds the ordinary case, the
+     over-picture case has a setting of its own. */
+  --hdr-ink: var(--hdr-ink-set, var(--color-text));
+  --hdr-ink-hover: var(--hdr-ink);
+  --hdr-ink-current: var(--color-accent);
 
   /* An icon control is a touch target carrying a smaller mark. Both sizes are
      tokens because the slack between them is what the bar's edge padding has
@@ -527,24 +586,34 @@ a {
   align-items: center;
   /* With the clusters aligned inward (see .hside below) this is literally the
      air either side of the wordmark, so the merchant sets it directly and it
-     is taken at face value here: the number typed into the theme editor is the
+     is taken at face value: the number typed into the theme editor is the
      number of pixels that appear.
 
-     The 22vw term is a safety rail, not a responsive rule, and the distinction
-     matters. Two gaps plus the wordmark plus the icons have to fit across the
-     bar; past roughly a quarter of the viewport each, the gaps starve the icon
-     column and push it off the side of the page. 22vw sits well clear of any
-     ordinary setting — at 1280px it only engages beyond 281px — so it never
-     quietly overrules the merchant the way a smaller viewport term would. It
-     only catches the extreme end of the range on a smaller screen. */
-  gap: min(var(--hdr-gap, 88px), 22vw);
+     The two sides are set independently, which `gap` cannot express — it is one
+     value between every column. So the gap is zero and the air is a margin on
+     each neighbour instead: the group before the centre carries the left space,
+     the group after it carries the right space.
+
+     Doing it that way rather than with margins on the centred group itself
+     matters. The 1fr columns either side stay equal, so the middle column stays
+     on the true centre of the bar; the two settings move the menu and the icons
+     nearer or further, they do not drag the wordmark off centre. Uneven values
+     give uneven air around a still-centred mark, which is the useful version of
+     this control. */
+  gap: 0;
   /* Pulled in by the icon slack. Aligning the 44px boxes to --edge would leave
      the marks sitting inside the edge the page below is aligned to, and the
      corners would read as loose. This lands the glyph on --edge instead. The
      floor is only a guard against a very small --edge leaving the controls
      against the side of the screen; it is deliberately below anything the
      correction produces at the shipped edge sizes, so it never overrides it. */
-  padding: 14px max(4px, calc(var(--edge) - var(--hicon-slack)));
+  /* The resting vertical padding, kept as a token and deliberately untouched by
+     the stuck rule below, so jogger.js can work out the bar's resting height
+     from a page that is already scrolled without having to unstick it and
+     reflow the document to take a measurement. */
+  --hdr-pad: 14px;
+
+  padding: var(--hdr-pad) max(4px, calc(var(--edge) - var(--hicon-slack)));
   color: var(--hdr-ink);
   transition: padding 0.4s var(--ease), box-shadow 0.4s var(--ease);
 }
@@ -579,33 +648,97 @@ a {
   min-width: 0;
 }
 
-/* Both clusters sit in toward the wordmark rather than out on the page edges.
+/* The air either side of the centred group. Addressed by position rather than
+   by name because which group sits where changes with the layout — the middle
+   child is always the centred one, whether that is the wordmark or the menu.
 
-   That is what makes the column gap mean anything. Pinned to the edges, the
-   air either side of the wordmark is just whatever the viewport has left over
-   — (viewport - padding - wordmark) / 2 - menu — and the gap cancels out of it
-   entirely, because widening the gap shrinks the 1fr columns by exactly as
-   much. Aligned inward, the gap *is* the distance. */
-.hside--left {
+   The second term is a safety rail, not a responsive rule, and the distinction
+   matters. Both spaces plus the centred group plus the icons have to fit across
+   the bar; give away too much and the icon column starves and the marks are
+   pushed off the side.
+
+   It is written as the space actually left over rather than as a flat fraction
+   of the viewport. A fraction is the wrong shape for this: what has to fit is a
+   fixed amount — the bar's padding, the centred group, and an icon column on
+   each side — so the room available for the two spaces is the viewport minus a
+   constant, not a percentage of it. 560px is that constant, taking the widest
+   padding and a centred *menu* rather than a centred wordmark, which is the
+   worst case because the menu is more than twice as wide. A little headroom is
+   folded in for the scrollbar.
+
+   The difference is not academic. At 22vw a 1320px screen capped every setting
+   above 290px, so 300 and 500 looked identical; the same screen now allows 380,
+   and 500 is reached in full from about 1600px. At 960px, the width where this
+   actually bites, it is stricter than the fraction was: 200px against 211. */
+.hdr > :nth-child(1) {
+  margin-right: min(var(--hdr-gap-left, 90px), max(20px, calc((100vw - 560px) / 2)));
+}
+
+.hdr > :nth-child(3) {
+  margin-left: min(var(--hdr-gap-right, 90px), max(20px, calc((100vw - 560px) / 2)));
+}
+
+/* ── bar layouts ──
+   All three share the base 1fr auto 1fr. The middle column lands on the true
+   centre of the bar, and the layout decides only who sits in it: the wordmark
+   when it is centred, the menu whenever it is not. The two 1fr columns either
+   side resolve to the same width, which is what makes that centring real
+   rather than approximate. The grid itself never changes.
+
+   Every group faces the centre — the first from its left, the third from its
+   right — and that is what makes the two spacing settings mean anything.
+
+   The alternative, pinning the outer groups to the page edges, was tried and
+   is a trap: with a group held against the edge and the middle one held on the
+   centre, the air between them is simply whatever the viewport has left over.
+   The margin still applies, it just changes nothing anyone can see, because it
+   is eaten by free space inside a 1fr column. Facing inward, the margin *is*
+   the distance.
+
+   Addressed by position rather than by name because which group sits where
+   changes with the layout — and this way one set of three rules covers all
+   three layouts instead of each needing its own. */
+.hdr > :nth-child(1) {
   justify-content: flex-end;
 }
 
-.hside--right {
+.hdr > :nth-child(2) {
+  justify-content: center;
+}
+
+.hdr > :nth-child(3) {
   justify-content: flex-start;
-  /* An icon box carries its slack inside it, so the first mark would otherwise
-     read a slack's width further from the wordmark than the last link does on
-     the other side. This puts the two optically level. */
+}
+
+/* An icon box carries its slack inside it, so the first mark would otherwise
+   read a slack's width further from the wordmark than the last link does on the
+   other side. This puts the two optically level.
+
+   Deliberately on .htools, the inner row, and not on the cluster itself: the
+   cluster's own margin-left is what carries the right-hand spacing setting, and
+   two different jobs on one property collide — the layout rules would cancel
+   the spacing while only meaning to cancel this correction. */
+.hdr--logo-centre .htools {
   margin-left: calc(-1 * var(--hicon-slack));
 }
 
 /* The wordmark is a stacked block: the mark, and under it an optional tagline.
    Tracking is a token on each line because the optical centring below has to
    subtract exactly the value that was added. */
+/* The wordmark's slot in the bar. This is the grid item; .logo below is the
+   link inside it. Keeping the two apart is what lets the slot be positioned and
+   spaced like any other group while the link keeps its own type treatment. */
+.hlogo {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .logo {
   --logo-track: 0.03em;
   --tag-track: 0.24em;
 
-  justify-self: center;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -719,7 +852,7 @@ a {
   right: 0;
   bottom: 0;
   height: 1px;
-  background: var(--color-accent);
+  background: var(--hdr-ink-current);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.38s var(--slow);
@@ -730,11 +863,16 @@ a {
   opacity: 1;
 }
 
-/* The page you are on is marked in the accent rather than by a rule under it,
-   which keeps the row even. The link also carries aria-current, so the state
-   reaches anyone not reading the colour. */
+.hnav a:hover {
+  color: var(--hdr-ink-hover);
+}
+
+/* The page you are on is marked by colour rather than by a rule under it,
+   which keeps the row even. The accent is the default, and a merchant can pick
+   another. The link also carries aria-current, so the state reaches anyone not
+   reading the colour. */
 .hnav a[aria-current] {
-  color: var(--color-accent);
+  color: var(--hdr-ink-current);
 }
 
 .hnav a:hover::after,
@@ -830,6 +968,7 @@ a {
 
 .hicon:hover {
   opacity: 1;
+  color: var(--hdr-ink-hover);
 }
 
 /* The count rides the bag rather than sitting beside it, so the row of icons
@@ -845,7 +984,7 @@ a {
   padding: 0 4px;
   border-radius: 999px;
   background: var(--color-accent);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 9.5px;
   font-weight: 500;
   letter-spacing: 0;
@@ -895,7 +1034,7 @@ a {
    which means the menu cannot borrow room from the emptier icon side. A long
    enough menu runs into the wordmark at any width. There is no breakpoint that
    answers that, because it depends on how many links a merchant wrote and how
-   long the words are, so mundo.js measures it and sets data-fold.
+   long the words are, so jogger.js measures it and sets data-fold.
 
    The toggle keeps the left column's glyph on the same line as the icons
    opposite, so the correction that the text needs comes back off. */
@@ -927,12 +1066,25 @@ a {
    meaning what it says. Phones are the exception, below. */
 
 @media (max-width: 940px) {
-  /* A generous desktop setting is far too much on a phone — at 88px the three
-     icons would be pushed into the wordmark. Below the fold the setting becomes
-     an upper bound over a proportional value, so it still counts, but the bar
-     can give way. */
+  /* A phone gets an even gap rather than the two separate settings.
+
+     Partly because a generous desktop value is far too much here — at 88px a
+     side the bar's contents would be pushed into the wordmark. Mostly because
+     the settings are margins on the first and third groups in the source, while
+     the rules below re-place the groups into different columns for the phone
+     bar; the wordmark would end up wearing a neighbour's margin and sitting
+     off centre. There is no room to be fussy about asymmetry on a phone, so the
+     grid's own gap does the job and the margins stand down. */
   .hdr {
-    gap: clamp(20px, 8vw, var(--hdr-gap, 88px));
+    gap: clamp(20px, 8vw, 88px);
+  }
+
+  .hdr > :nth-child(1) {
+    margin-right: 0;
+  }
+
+  .hdr > :nth-child(3) {
+    margin-left: 0;
   }
 
   .hnav {
@@ -947,12 +1099,48 @@ a {
     gap: 0;
   }
 
-  .hside--left {
+  /* Every layout collapses to the same phone bar: toggle, wordmark, icons.
+     With the menu folded away, a "logo left" or "logo right" arrangement would
+     leave the toggle stranded in the middle column, which is not where anyone
+     looks for it.
+
+     Done by placing the groups on grid lines rather than by reordering them,
+     because the source order is set in the section and only the three columns
+     need swapping — nothing here changes what the markup says. */
+  /* Written as `.hdr > .class` so these match the weight of the positional
+     `.hdr > :nth-child()` rules above and, coming later, win. Addressed by name
+     rather than by position because on a phone the groups are re-placed into
+     columns that no longer match their source order.
+
+     Every one of them names its row as well as its column, and that is not
+     belt and braces. Grid places items in source order and never steps
+     backwards: with the wordmark first in the source but sitting in column 2,
+     the menu that follows it can no longer be given column 1 on that row, so
+     grid opens a second row and puts it there. The bar silently becomes two
+     lines — wordmark above, hamburger below. Pinning every group to row 1 is
+     what keeps the placement a swap rather than a wrap. */
+  .hdr > .hside--left {
+    grid-row: 1;
+    grid-column: 1;
     justify-content: flex-start;
   }
 
-  .hside--right {
+  .hdr > .hlogo {
+    grid-row: 1;
+    grid-column: 2;
+    justify-content: center;
+  }
+
+  .hdr > .hside--right {
+    grid-row: 1;
+    grid-column: 3;
     justify-content: flex-end;
+  }
+
+  /* The icons are in the drawer on a phone, so the optical correction has
+     nothing to correct. Cleared on .htools, leaving the cluster's own margin —
+     the spacing setting — alone. */
+  .htools {
     margin-left: 0;
   }
 }
@@ -1094,8 +1282,69 @@ a {
   position: relative;
   overflow: hidden;
   border-radius: var(--r);
-  height: clamp(460px, var(--hero-height, 78vh), 820px);
+  /* The ceiling is the screen, not a fixed pixel count. It used to be 820px,
+     which quietly overruled the Height setting on any tall display: on a
+     1000px screen every value above 82% rendered the same, leaving a band of
+     page showing under a hero that had been asked to fill it. The floor stays
+     absolute so the picture keeps some presence on a short laptop. */
+  height: clamp(460px, var(--hero-height, 78vh), 100vh);
   background: var(--color-surface);
+}
+
+/* Runs the picture up under the bar. The header keeps its place in the flow and
+   the hero is pulled up over it by exactly the bar's resting height, which
+   jogger.js publishes as --hdr-h; the fallback covers the moment before the
+   script runs. Pulling the hero rather than floating the header leaves the
+   announcement ticker above it undisturbed. */
+.hero--under {
+  margin-top: calc(-1 * var(--hdr-h, 72px));
+}
+
+/* Light ink while the bar is floating over the picture. Once it sticks, its own
+   blurred ground fades in beneath it and the scheme's text colour is the
+   legible choice again.
+
+   The hero has to be the page's first section for this to hold. Asked only
+   whether such a hero exists anywhere, the rule would light the bar on a page
+   whose hero sits further down — where the bar opens over the ordinary page
+   ground and pale ink on it cannot be read at all. Being under the bar is a
+   claim about the top of the page, so the selector says so. */
+body:has(#MainContent > :first-child .hero--under) .hdr:not([data-stuck]) {
+  --hdr-ink: var(--hdr-ink-over, #fff);
+}
+
+/* A photograph can put anything behind the bar, and the hero's own veil is no
+   help — it shades the foot of the image and has faded out entirely by 66%,
+   which is exactly where the bar sits. So the picture carries a short scrim
+   across its top for the light ink to sit on.
+
+   Shading the ground is the right way round. A shadow behind the type instead
+   only thickens the letterforms and goes muddy over a bright sky. Black rather
+   than the scheme's text colour on purpose: it exists to carry white ink, and
+   on a dark scheme the scheme colour would lighten the very ground it is meant
+   to darken. It rides on the veil rather than the frame so the hotspots, which
+   come later in the source, still sit above it. */
+.hero--under .hero-veil::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(var(--hdr-h, 72px) + 56px);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.34) 0%,
+    rgba(0, 0, 0, 0.12) 55%,
+    transparent 100%
+  );
+}
+
+/* Edge to edge. The corner radius goes with the margins — a rounded corner hard
+   against the side of the screen reads as a mistake rather than a detail. */
+.hero--bleed {
+  padding-inline: 0;
+}
+
+.hero--bleed .hero-frame {
+  border-radius: 0;
 }
 
 /* Whole-picture mode. The frame takes the image's own proportions, so filling
@@ -1159,13 +1408,68 @@ a {
   );
 }
 
+/* The copy is inset from all three sides and capped in width, so it wraps to a
+   readable measure rather than running the width of the picture. Which side it
+   settles against is the alignment below.
+
+   The cap is a setting because it is what decides where the heading breaks: a
+   larger heading in a fixed block simply wraps sooner, which reads as the size
+   control being broken. Widening the block is how a bigger heading is kept on
+   one line. The body inside keeps its own 40ch measure regardless, so a wide
+   block gives the heading room without turning the paragraph into long
+   unreadable lines. */
 .hero-card {
   position: absolute;
-  left: clamp(18px, 3vw, 44px);
-  bottom: clamp(18px, 3vw, 44px);
-  right: clamp(18px, 3vw, 44px);
-  max-width: 520px;
+  /* How far the block sits from the picture's edges, set in the editor.
+
+     The second term is a guard against an inset large enough to leave nothing
+     to write on, and it is a share of the picture rather than of the screen.
+     That distinction matters: a percentage offset on an absolutely positioned
+     box resolves against its container, so these track the frame the text
+     actually sits in. Against the viewport instead, a tall hero on a short
+     window capped the foot inset at a tenth of the screen — around 90px — and
+     every larger value did nothing. */
+  left: min(var(--hero-inset-x, 44px), 20%);
+  right: min(var(--hero-inset-x, 44px), 20%);
+  bottom: min(var(--hero-inset-y, 44px), 33%);
+  max-width: var(--hero-card-w, 520px);
   color: #fff;
+}
+
+/* Alignment is done with an auto margin rather than by swapping left/right,
+   because the block is narrower than the space it sits in: the insets stay put
+   as the outer limits and the margin decides where inside them the block lands.
+   The text alignment follows, so a centred block reads as centred rather than
+   as ragged text that happens to sit in the middle.
+
+   The button needs nothing of its own — it is inline-flex, so text-align moves
+   it along with the words. */
+.hero-card--centre {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.hero-card--right {
+  margin-left: auto;
+  text-align: right;
+}
+
+/* Vertical placement. Named --v- rather than reusing "centre" so there is no
+   confusion with the horizontal rules above: the block can be centred across
+   and sitting at the foot at the same time.
+
+   Each clears the inset it is not using, because the base rule pins the block
+   to the bottom and an unset `top` would otherwise leave both in force and
+   stretch the block over the full height of the picture. */
+.hero-card--v-top {
+  top: min(var(--hero-inset-y, 44px), 33%);
+  bottom: auto;
+}
+
+.hero-card--v-middle {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
 }
 
 .hero-card .lab {
@@ -1187,16 +1491,65 @@ a {
   margin: 14px 0 24px;
 }
 
+/* The body is held to 40ch so it wraps to a readable measure, which makes it a
+   block narrower than the card. Left alone it stays pinned to the left edge and
+   only its text moves, so the paragraph ends up visibly out of step with the
+   heading above it — the heading reaching the far side while the body stops
+   short. Moving the block itself is what lines the two up.
+
+   These follow the rule above rather than sitting with the other alignment
+   rules because they carry the same weight, and at equal weight the later rule
+   is the one that applies. */
+.hero-card--centre p:not(.lab) {
+  margin-inline: auto;
+}
+
+.hero-card--right p:not(.lab) {
+  margin-left: auto;
+  margin-right: 0;
+}
+
 .hero-card .b-paper {
   color: var(--color-text);
 }
 
+/* The pills sit against the picture, and are placed exactly as the text block
+   is — including the guards, which are a share of the frame rather than of the
+   screen. See .hero-card above for why.
+
+   Both sides are set rather than only one, so the row spans the frame and
+   justify-content does the placing; that keeps the pills shoulder to shoulder
+   wherever they are sent. A row that wide would lie over the text block when
+   both are sent to the same corner, so it takes no pointer events — these are
+   captions, there is nothing here to click. */
 .hero-side {
   position: absolute;
-  right: clamp(18px, 3vw, 44px);
-  top: clamp(18px, 3vw, 44px);
+  left: min(var(--hero-pill-x, 44px), 20%);
+  right: min(var(--hero-pill-x, 44px), 20%);
+  top: min(var(--hero-pill-y, 44px), 33%);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
+  pointer-events: none;
+}
+
+.hero-side--left {
+  justify-content: flex-start;
+}
+
+.hero-side--centre {
+  justify-content: center;
+}
+
+.hero-side--v-middle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hero-side--v-bottom {
+  top: auto;
+  bottom: min(var(--hero-pill-y, 44px), 33%);
 }
 
 .pill {
@@ -1209,6 +1562,121 @@ a {
   background: rgba(var(--color-bg-rgb), 0.86);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* The prompt at the foot of the hero. Deliberately quiet — tracked caps and a
+   hairline, the same register as the section labels — rather than a bouncing
+   arrow, which would be the loudest thing on a page built around one
+   photograph. */
+.hero-cue {
+  position: absolute;
+  bottom: clamp(16px, 2.4vw, 32px);
+  z-index: 2;
+
+  /* Padding rather than a bigger mark: the chevrons stay small while the
+     control keeps a target worth aiming at. */
+  display: inline-grid;
+  place-items: center;
+  padding: 14px 20px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  opacity: 0.75;
+  transition: opacity 0.45s var(--ease);
+}
+
+.hero-cue--centre {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hero-cue--right {
+  right: clamp(16px, 3vw, 40px);
+}
+
+.hero-cue:hover,
+.hero-cue:focus-visible {
+  opacity: 1;
+}
+
+/* Once the visitor has taken the hint the cue has done its job, so it leaves.
+   Only the opacity moves: the centred one is held in place by a transform, and
+   animating that here would drag it off its own centre. */
+.hero-cue[data-gone] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Two chevrons falling one after the other. Small and hairline-thin on
+   purpose: on a page built around a single photograph the cue has to be read
+   without becoming the loudest thing on it. */
+.hero-cue-arrows {
+  display: grid;
+  gap: 2px;
+  place-items: center;
+}
+
+/* Each chevron is a square carrying two of its own borders and turned on the
+   diagonal, so the mark is drawn rather than typed — no glyph, no font to load
+   and nothing for a screen reader to stumble over. */
+.hero-cue-arrows i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid currentcolor;
+  border-bottom: 1px solid currentcolor;
+  animation: cue-fall 2s var(--ease) infinite;
+}
+
+/* The second follows the first rather than moving with it, which is what makes
+   the pair read as travel in a direction instead of a blink. */
+.hero-cue-arrows i:nth-child(2) {
+  animation-delay: 0.24s;
+}
+
+/* The box is already turned 45deg, so its own axes point down-right and
+   down-left. Shifting equally along both cancels the sideways halves and what
+   is left is straight down — 4px on each axis coming out as about 5.7px of
+   fall. Written this way because a transform replaces the rotation outright:
+   the turn has to be restated in every keyframe or the chevron springs back
+   to a square as the animation starts. */
+@keyframes cue-fall {
+  0% {
+    opacity: 0;
+    transform: rotate(45deg) translate(-4px, -4px);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+}
+
+/* On a phone the picture is narrow, so hero text at the foot runs the full
+   width of it and the cue has nowhere to stand that is not on top of the
+   button. Rather than drop the cue, the text is lifted clear of it.
+
+   Written as a floor rather than as an addition so it holds at any setting: the
+   text keeps whatever distance from the foot the merchant chose, unless that
+   would put it inside the cue, in which case it takes the clearance instead.
+
+   The two exclusions matter. Text at the top or in the middle sets `bottom` to
+   auto and has no quarrel with the cue, but this selector carries more weight
+   than the rules that do that — without them it would plant those layouts back
+   at the foot. */
+@media (max-width: 749px) {
+  .hero-frame:has(.hero-cue:not(.hero-cue--wide)) .hero-card:not(.hero-card--v-top):not(.hero-card--v-middle) {
+    bottom: max(min(var(--hero-inset-y, 44px), 33%), 84px);
+  }
+
+  .hero-cue--wide {
+    display: none;
+  }
 }
 
 /* shoppable hotspots */
@@ -1369,6 +1837,11 @@ a {
   border: 0;
   padding: 0;
   display: block;
+  /* A grid item's automatic minimum size is its min-content width, so a card
+     whose meta row cannot fit — a long name, or a sale price carrying both the
+     old and new figure — would push past its column and print over the card
+     beside it. The track is already minmax(0, 1fr); this lets the card use it. */
+  min-width: 0;
 }
 
 .pframe {
@@ -1428,7 +1901,7 @@ a {
 
 .tag.sage {
   background: var(--color-accent-2);
-  color: #fff;
+  color: var(--on-accent-2);
 }
 
 .tag.sold {
@@ -1531,11 +2004,15 @@ a {
   margin: 0;
 }
 
+/* Category and price share a line while they both fit, and the price drops
+   beneath the category when they do not — which on a two-column phone grid is
+   often, since a sale price is two figures wide. */
 .pmeta .row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 2px 12px;
   align-items: baseline;
+  flex-wrap: wrap;
 }
 
 .pmeta .cat {
@@ -1545,9 +2022,17 @@ a {
   color: var(--ink-60);
 }
 
+/* The nowrap moved off this container and onto the two figures inside it. Held
+   here it made "was" and "now" a single unbreakable run — on a narrow card that
+   is what forced the overflow. Held on each figure, the pair may fall onto two
+   lines while neither figure ever breaks mid-number. */
 .pmeta .pr {
   font-size: calc(14px * var(--type-scale) * var(--ts, 1));
   color: var(--color-text);
+}
+
+.pr .was,
+.pr .now {
   white-space: nowrap;
 }
 
@@ -1615,6 +2100,116 @@ a {
 .band .tick-run em {
   font-style: normal;
   color: var(--color-accent-400);
+}
+
+/* ── brand band ── */
+/* The band clips the travelling track, so a logo entering or leaving is cut at
+   the page edge rather than widening the document. */
+.brands {
+  overflow: hidden;
+  padding-block: clamp(40px, 6vw, 84px);
+}
+
+.brands-head {
+  margin-bottom: clamp(22px, 3vw, 40px);
+}
+
+/* Takes the animation from .tick-run and changes only what a row of circles
+   needs: its own spacing, and a centre line to hang them from. */
+.brand-run {
+  align-items: center;
+  gap: clamp(20px, 3vw, 56px);
+  padding-left: clamp(20px, 3vw, 56px);
+}
+
+.brands:hover .tick-run {
+  animation-play-state: paused;
+}
+
+/* The circle. Sized from one token so a merchant moves one number, and held to
+   a square with a full radius — a ball whatever the picture inside it. */
+.ball {
+  flex: 0 0 var(--ball, 120px);
+  width: var(--ball, 120px);
+  height: var(--ball, 120px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-surface);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  transition: transform 0.4s var(--slow);
+
+  /* A ring drawn as a border rather than as an outset shadow, and the reason is
+     the loose layout: box-sizing is border-box across the theme, so a border
+     keeps the circle's outside diameter exactly --ball whatever its thickness.
+     A shadow would hang beyond that instead, and the drifting circles measure
+     their own width to know when they have met — rings would pass through one
+     another while the circles beneath still bounced apart. */
+  border: var(--ring, 0) solid var(--ring-color, var(--color-divider));
+}
+
+.ball:hover {
+  transform: scale(1.05);
+}
+
+/* A logo is given room inside the circle rather than being cropped by it: most
+   marks carry their own margins and read badly pressed against a curve. The
+   frame is squared off first, since .media would otherwise keep whatever ratio
+   the file has and sit off centre in the ball. */
+.ball .media {
+  width: 62%;
+  height: 62%;
+  aspect-ratio: 1;
+  background: none;
+}
+
+.ball .media > img,
+.ball .media > svg {
+  object-fit: contain;
+}
+
+/* Filling instead: the picture takes the whole ball and the circle crops it,
+   which is what a photograph wants. */
+.ball--cover .media {
+  width: 100%;
+  height: 100%;
+}
+
+.ball--cover .media > img,
+.ball--cover .media > svg {
+  object-fit: cover;
+}
+
+/* The loose area: a closed box the circles drift inside. Its walls are what
+   they bounce off, so it clips as much as it contains. */
+.brand-float {
+  position: relative;
+  height: var(--float-h, 360px);
+  overflow: hidden;
+  margin-inline: var(--edge);
+  touch-action: pan-y;
+}
+
+/* Placed by script, so the position is written as a transform rather than as
+   top and left — a transform is composited, and moving twenty circles a frame
+   through layout would not be. Anchored at the origin so the transform is the
+   whole of the position and nothing has to be added to it. */
+.brand-float .ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  transition: none;
+}
+
+/* The circle's own hover lift cannot be used here: its transform is the thing
+   holding the circle in place, and a hover rule would replace the position
+   outright and throw it back to the corner. The picture inside answers
+   instead. */
+.brand-float .ball:hover .media {
+  transform: scale(1.06);
+  transition: transform 0.4s var(--slow);
 }
 
 /* ── category tiles ──
@@ -1747,14 +2342,31 @@ a {
 }
 
 @media (max-width: 880px) {
+  /* Stacked, the two halves no longer share a row, so the section's desktop
+     rhythm lands as dead air: the picture is pushed a long way down the page
+     before the writing under it even begins. Both the padding and the gap come
+     in, and the padding still grows with the viewport towards its desktop
+     value rather than stepping. */
   .split,
   .split.flip {
     grid-template-columns: 1fr;
+    padding-block: clamp(40px, 9vw, 56px);
+    gap: 22px;
   }
 
   .split figure,
   .split.flip figure {
     order: -1;
+  }
+
+  /* A frame with no image in it yet holds a placeholder, and stacked above the
+     writing at the full 4/3 that is a wall of nothing between this section and
+     the one before. It stays visible — a merchant setting the section up needs
+     to see where the picture goes — but shallow enough to read as a slot
+     waiting to be filled rather than as a hole in the page. A real photograph
+     is untouched. */
+  .split figure .media:has(> .placeholder-svg) {
+    aspect-ratio: 16 / 9;
   }
 }
 
@@ -1767,6 +2379,15 @@ a {
   padding-bottom: 8px;
   cursor: grab;
   scrollbar-width: none;
+}
+
+/* Snapping and drifting are two things trying to decide the same number. The
+   drift writes a fraction of a pixel to scrollLeft each frame; mandatory snap
+   answers by dragging it back to the nearest card, and the rail judders in
+   place instead of moving. The drift is the one that was asked for, so snap
+   stands down while it runs — and comes straight back if it is turned off. */
+.rail[data-drift] {
+  scroll-snap-type: none;
 }
 
 .rail::-webkit-scrollbar {
@@ -1816,6 +2437,45 @@ a {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-60);
+}
+
+/* The staggered rail: cards step alternately down and up as the rail runs.
+
+   Done with margins rather than a transform, and that is not a stylistic
+   preference. The rail scrolls horizontally, and a box with overflow set on one
+   axis computes the other to auto rather than visible — so a card nudged with
+   translateY would be clipped at the rail's edge, or would summon a vertical
+   scrollbar. Margins are part of layout, so the rail simply grows to hold them
+   and nothing is cut off.
+
+   flex-start is needed with them: the default stretch would pull every card to
+   the tallest, and a card stretched to fill cannot then be moved by a margin. */
+.rail--stagger {
+  align-items: flex-start;
+}
+
+.rail--stagger .look:nth-child(odd) {
+  margin-top: var(--look-step, 48px);
+}
+
+/* The even cards keep their place at the top and reserve the same distance
+   beneath them, which is what gives the rail a height that holds both rows of
+   the step without any card overhanging it. */
+.rail--stagger .look:nth-child(even) {
+  margin-bottom: var(--look-step, 48px);
+}
+
+@media (max-width: 749px) {
+  /* Half the step on a phone. The cards are already narrow there and the rail
+     is scrolled sideways, so vertical room is the scarcer thing — a step sized
+     for a wide screen costs more than it gives. */
+  .rail--stagger .look:nth-child(odd) {
+    margin-top: calc(var(--look-step, 48px) / 2);
+  }
+
+  .rail--stagger .look:nth-child(even) {
+    margin-bottom: calc(var(--look-step, 48px) / 2);
+  }
 }
 
 /* ── values ──
@@ -1931,11 +2591,16 @@ a {
   border-top: 1px solid var(--color-divider);
 }
 
+/* padding-block, not the padding shorthand. This element is also a .wrap, which
+   is what gives it the page gutter, and the shorthand would set padding-inline
+   to zero as a side effect — at two classes it outranks .wrap, so the columns
+   would run to the very edge of the screen while the bar below them, an
+   untouched .wrap, stayed inset. */
 .ftr .cols {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(auto-fit, minmax(140px, 1fr));
   gap: 36px clamp(20px, 3vw, 56px);
-  padding: clamp(44px, 6vw, 76px) 0 44px;
+  padding-block: clamp(44px, 6vw, 76px) 44px;
 }
 
 .ftr h5 {
@@ -1985,6 +2650,59 @@ a {
   color: var(--ink-60);
   margin: 0;
   max-width: 32ch;
+}
+
+/* Only ever seen in the theme editor: the storefront drops an empty column
+   rather than styling one. Dashed rather than solid so it reads as a slot to
+   fill, not as part of the design. */
+.ftr-hint {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-divider);
+  border-radius: var(--r);
+  font-size: calc(12.5px * var(--ts, 1));
+  line-height: 1.5;
+  color: var(--ink-60);
+}
+
+/* The contact column. It inherits the list rhythm from .ftr ul above and the
+   link treatment from .ftr a, so only what differs is set here.
+
+   A number and an address are the two things in a footer anyone reaches for
+   with a thumb, and a line of text is about nineteen pixels tall. So the links
+   here carry their own padding, and the list gap comes in by the same amount to
+   pay for it — a bigger target, without the column opening up out of step with
+   the menus beside it. */
+/* Written as `.ftr ul.ftr-contact` to outweigh the `.ftr ul` rule that sets the
+   footer's list rhythm. As a bare class it lost, and the padding below was then
+   added on top of the full 11px instead of in place of it — a column visibly
+   looser than the menus beside it. */
+.ftr ul.ftr-contact {
+  gap: 0;
+}
+
+.ftr-contact a {
+  display: inline-block;
+  padding-block: 6px;
+}
+
+.ftr-contact address {
+  margin-bottom: 6px;
+  /* address is semantically right for a shop's own details and the browser's
+     italic default is not. */
+  font-style: normal;
+  font-size: calc(14px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.65;
+  color: var(--ink-80);
+}
+
+/* Opening hours are a note beside the details rather than one of them, so they
+   sit back a step and take a little air above. */
+.ftr-hours {
+  margin-top: 3px;
+  font-size: calc(13px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.6;
+  color: var(--ink-60);
 }
 
 .ftr .socials {
@@ -2290,7 +3008,7 @@ a {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: var(--color-accent-2);
-  color: #fff;
+  color: var(--on-accent-2);
   border-radius: 999px;
   padding: 4px 10px;
 }
@@ -3243,6 +3961,21 @@ a {
   scroll-snap-align: start;
 }
 
+/* Demo mode's catcher for the dynamic checkout button. Shopify owns that
+   markup — Shop Pay is an iframe — so the click is intercepted above it rather
+   than on it. Transparent and sized to the holder, so the button underneath
+   looks exactly as it always did. */
+.pdp-payment {
+  position: relative;
+}
+
+.pdp-payment-guard {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
 /* ── product card variants ── */
 .pcard.center {
   text-align: center;
@@ -3829,8 +4562,11 @@ a {
 }
 
 /* ── cart page ── */
+/* padding-block: this is also a .wrap, and the padding shorthand would zero the
+   page gutter it gets from there. Same weight as .wrap and later in the file,
+   so the shorthand would win and the page would run to the screen edge. */
 .cart-page {
-  padding: clamp(28px, 4vw, 56px) 0 clamp(56px, 8vw, 100px);
+  padding-block: clamp(28px, 4vw, 56px) clamp(56px, 8vw, 100px);
 }
 
 .cart-grid {
@@ -3900,14 +4636,89 @@ a {
 }
 
 /* ── customer accounts ── */
+/* padding-block, for the same reason as .cart-page above. */
 .account {
-  padding: clamp(40px, 6vw, 88px) 0 clamp(56px, 8vw, 100px);
+  padding-block: clamp(40px, 6vw, 88px) clamp(56px, 8vw, 100px);
 }
 
 .account-form {
   max-width: 420px;
   display: grid;
   gap: 22px;
+}
+
+/* ── contact ── */
+/* Two columns: the shop's own words on one side, the form on the other. The
+   form used to borrow .account-form, which is built for a login box — a 420px
+   column, correct for four short fields, wrong for a message someone has to
+   write into. */
+.contact-page {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
+  gap: clamp(30px, 5vw, 90px);
+  align-items: start;
+  padding-block: clamp(40px, 6vw, 88px) clamp(56px, 8vw, 110px);
+}
+
+.contact-lede .dsp {
+  margin: 0;
+}
+
+.contact-intro {
+  margin-top: 18px;
+  max-width: 42ch;
+  font-size: calc(15.5px * var(--type-scale) * var(--ts, 1));
+  line-height: 1.75;
+  color: var(--ink-80);
+}
+
+/* Short fields share a row rather than each taking one, which stops the form
+   running down the page as a single ladder of underlines. */
+.contact-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px clamp(18px, 2.4vw, 30px);
+}
+
+.contact-form .field--wide,
+.contact-form .form-foot,
+.contact-form .form-success,
+.contact-form .form-error {
+  grid-column: 1 / -1;
+}
+
+.contact-form textarea {
+  min-height: 150px;
+}
+
+/* The submit carried the padding of a link button dropped into a paragraph,
+   which read as incidental at the foot of a form. It takes its own weight
+   here, and on a phone it spans the column so it is a proper target rather
+   than a small pill under a full-width field. */
+.contact-form .form-foot {
+  margin-top: 6px;
+}
+
+.contact-form .form-foot .b {
+  padding: 15px 34px;
+}
+
+@media (max-width: 880px) {
+  .contact-page {
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 5vw, 40px);
+  }
+}
+
+@media (max-width: 620px) {
+  .contact-form {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form .form-foot .b {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .account-grid {

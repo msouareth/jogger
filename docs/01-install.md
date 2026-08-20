@@ -1,4 +1,4 @@
-# Installing Mundo
+# Installing Jogger
 
 ## What you received
 
@@ -8,17 +8,17 @@ A `.zip` file containing the theme. Don't unzip it — Shopify wants the zip.
 
 1. In your Shopify admin, go to **Online Store → Themes**
 2. Under **Theme library**, click **Add theme → Upload zip file**
-3. Choose the Mundo zip and wait for it to process
+3. Choose the Jogger zip and wait for it to process
 4. Click **Customize** to start setting it up, or **Publish** when you're ready
    for customers to see it
 
-Mundo installs alongside your current theme. Nothing on your live store changes
+Jogger installs alongside your current theme. Nothing on your live store changes
 until you press **Publish**, so you can set the whole thing up in private first.
 That's the recommended way to do it.
 
 ## Before it looks like the demo
 
-Mundo renders your real products, collections and menus, so a brand-new store
+Jogger renders your real products, collections and menus, so a brand-new store
 shows placeholder frames rather than the demo imagery. The three things that
 make the biggest difference, in order:
 
@@ -30,7 +30,7 @@ make the biggest difference, in order:
 3. **Images** — hero, category tiles, editorial and lookbook images are all set
    in the theme editor.
 
-See [Setting up](02-setup.md) for the full run-through.
+See [Setting up](02-setup.html) for the full run-through.
 
 ## Requirements
 

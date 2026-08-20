@@ -21,7 +21,7 @@ In the **Header** section you can either upload a **logo image** (and set its
 width), or use the **wordmark** — your store name as text.
 
 The wordmark has a second field, **Wordmark tail**, which renders in a lighter
-weight and joins onto the end. Typing `mun` and `do` gives you `mundo` with the
+weight and joins onto the end. Typing `Jog` and `ger` gives you `Jogger` with the
 two-weight treatment from the original design. Leave the tail empty for a plain
 wordmark.
 
@@ -64,7 +64,7 @@ Two layouts, set on the Product section:
   beneath, swipe on touch, and arrow-key support. Choosing a colour moves the
   gallery to that variant's photo.
 - **Grid** — every image stacked two-up with each third running full width.
-  This is the original Mundo layout.
+  This is the original Jogger layout.
 
 For gallery, you can also set:
 

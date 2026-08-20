@@ -42,7 +42,11 @@
     "menu": "Menu",
     "open_menu": "Open menu",
     "share": "Share",
-    "share_copied": "Link copied"
+    "share_copied": "Link copied",
+    "demo_checkout": "This is a demo store — checkout is switched off.",
+    "media": {
+      "empty": "No image yet — choose one in this section’s settings."
+    }
   },
   "accessibility": {
     "skip_to_content": "Skip to content",
@@ -144,7 +148,13 @@
     "footer": {
       "payment_methods": "Payment methods",
       "country": "Country/region",
-      "language": "Language"
+      "language": "Language",
+      "empty_menu": "Pick a menu for this column — or remove the block. Columns with no links are hidden on the live shop.",
+      "empty_text": "Add some text — or remove the block. Empty columns are hidden on the live shop.",
+      "empty_contact": "Add an address, a phone number or an email — or remove the block. Empty columns are hidden on the live shop."
+    },
+    "hero": {
+      "scroll": "Scroll"
     }
   },
   "blogs": {

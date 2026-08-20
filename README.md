@@ -1,4 +1,4 @@
-# Mundo
+# Jogger
 
 A warm, modern apparel theme for Shopify. Visible grid, flush-left labels, light
 type weights on a sand ground, and a camel accent. Motion throughout: scroll
@@ -29,7 +29,7 @@ shopify theme dev --store your-store.myshopify.com
 To push a copy to the store:
 
 ```bash
-shopify theme push --unpublished --theme "Mundo"
+shopify theme push --unpublished --theme "Jogger"
 ```
 
 To package it for distribution:

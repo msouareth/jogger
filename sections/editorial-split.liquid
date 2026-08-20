@@ -14,14 +14,47 @@
   <div class="wrap">
     <div class="split{{ flip }}">
       <figure class="rv-img">
-        {% render 'media',
-          image: section.settings.image,
-          class: parallax,
-          ratio: '4 / 3',
-          sizes: '(min-width: 880px) 55vw, 100vw',
-          placeholder: 'lifestyle-2',
-          alt: section.settings.image_alt
-        %}
+        {%- comment -%}
+          A video takes the frame when one is set, and the image becomes its
+          poster — the still shown while the file loads, and what stays if the
+          browser refuses to autoplay. Setting both is the good case, not a
+          clash, which is why the image picker is not hidden when a video is
+          chosen.
+
+          Muted and playsinline are not decoration: without muted no browser
+          will autoplay at all, and without playsinline iOS takes the video
+          fullscreen the moment it starts. No controls, because this sits in a
+          page as a picture does, not as something to operate.
+
+          The frame keeps its 4/3 shape either way, so the column does not
+          change height with the proportions of the file uploaded, and the
+          video is cropped to fill exactly as a photograph is. Reduced motion is
+          handled in jogger.js, which pauses any autoplaying video on the page.
+        {%- endcomment -%}
+        {%- if section.settings.video != blank -%}
+          <div class="media{{ parallax }}" style="--media-ratio: 4 / 3;">
+            {{
+              section.settings.video
+              | video_tag:
+                image_size: '1200x',
+                autoplay: true,
+                loop: true,
+                muted: true,
+                controls: false,
+                playsinline: true,
+                poster: section.settings.image
+            }}
+          </div>
+        {%- else -%}
+          {% render 'media',
+            image: section.settings.image,
+            class: parallax,
+            ratio: '4 / 3',
+            sizes: '(min-width: 880px) 55vw, 100vw',
+            placeholder: 'lifestyle-2',
+            alt: section.settings.image_alt
+          %}
+        {%- endif -%}
       </figure>
 
       {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
@@ -81,7 +114,14 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Image",
+      "info": "Also serves as the video poster below — the still shown while the video loads, and what stays if a browser refuses to autoplay. Worth setting even when you use a video."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video",
+      "info": "Takes the place of the image when set. Plays muted and on a loop, with no controls, cropped to the same shape as the picture would be — so the column keeps its height whatever the proportions of your file. A visitor who has asked their device for reduced motion sees the poster instead."
     },
     {
       "type": "text",

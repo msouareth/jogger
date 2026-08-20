@@ -20,7 +20,34 @@
       </div>
     {%- endif -%}
 
-    <div class="rail">
+    {%- comment -%}
+      Wrapped so the rail gets the same arrows the related products carousel
+      uses — jogger.js binds them by class, so no new script is involved.
+
+      Dragging alone was never enough. It is invisible unless you happen to try
+      it, the hint saying so is only text and cannot be clicked, and a rail you
+      can only drag is unreachable by keyboard entirely. Real buttons fix all
+      three at once.
+    {%- endcomment -%}
+    {%- liquid
+      comment
+        The level rail is the original and adds nothing, so a stored lookbook
+        that predates this setting keeps the design it already had.
+      endcomment
+      assign rail_class = 'rail'
+      if section.settings.layout == 'stagger'
+        assign rail_class = 'rail rail--stagger'
+      endif
+    -%}
+    <div class="rail-wrap">
+    <div
+      class="{{ rail_class }}"
+      style="--look-step: {{ section.settings.stagger | default: 48 }}px;"
+      {%- if section.settings.drift %}
+        data-drift
+        data-drift-speed="{{ section.settings.drift_speed | default: 25 }}"
+      {%- endif %}
+    >
       {%- for block in section.blocks -%}
         <figure class="look" {{ block.shopify_attributes }}>
           {%- if block.settings.link != blank -%}
@@ -48,6 +75,18 @@
         </figure>
       {%- endfor -%}
     </div>
+
+      {%- comment -%}
+        Sat against the images rather than the captions beneath them, which is
+        what --rail-nav-top is for.
+      {%- endcomment -%}
+      <button type="button" class="rail-nav prev" data-rail-prev aria-label="{{ 'accessibility.previous' | t }}" style="--rail-nav-top: 34%;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button type="button" class="rail-nav next" data-rail-next aria-label="{{ 'accessibility.next' | t }}" style="--rail-nav-top: 34%;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -63,6 +102,52 @@
       "id": "color_scheme",
       "label": "Colour scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "info": "Level is the original: every card on the same line. Staggered steps them alternately down and up as the rail runs, which reads less like a filmstrip and more like a spread.",
+      "options": [
+        {
+          "value": "level",
+          "label": "Level — one straight line"
+        },
+        {
+          "value": "stagger",
+          "label": "Staggered — cards step down and up"
+        }
+      ],
+      "default": "level"
+    },
+    {
+      "type": "range",
+      "id": "stagger",
+      "label": "Step",
+      "info": "How far the staggered cards move from the line — the first down, the next up, and so on. Halved on a phone, where the cards are narrow and the height is worth more. Has no effect on the level layout.",
+      "min": 8,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "checkbox",
+      "id": "drift",
+      "label": "Move on its own",
+      "info": "The rail drifts steadily sideways and never reaches an end — the looks repeat, and the join cannot be seen. Dragging, flicking or the arrows take over at any moment, and it picks up again as soon as the visitor lets go. It stops for anyone who has asked their device for reduced motion, and while it is off screen.",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "drift_speed",
+      "label": "Speed",
+      "info": "Pixels a second. Around 25 reads as a slow drift; past 60 it starts to feel like it is being scrolled for you.",
+      "min": 5,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 25
     },
     {
       "type": "text",

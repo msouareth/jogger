@@ -8,23 +8,181 @@
 
   The design's hand-picked camel ramp is regenerated from each scheme's single
   accent colour: steps 100-400 mix toward that scheme's own ground, steps
-  600-900 darken. The weights are tuned to land on the original swatches when
-  the accent is left at its default #8a6f52.
+  600-900 step away from it. The weights are tuned to land on the original
+  swatches when the accent is left at its default #8a6f52.
+
+  Colour mode turns every scheme over rather than swapping in a second set of
+  colours. The merchant keeps one palette and chooses which way up it is used,
+  so a brand colour picked once is still the brand colour in either mode and
+  there is no second set of swatches to keep in step. Ground and ink simply
+  trade places — an exact swap, nothing guessed — and only the accents are
+  derived, because an accent chosen to carry on paper will not carry on ink.
 {%- endcomment -%}
+
+{%- liquid
+  assign dark = false
+  if settings.color_mode == 'dark'
+    assign dark = true
+  endif
+-%}
 
 {%- for scheme in settings.color_schemes -%}
   {%- liquid
-    assign accent = scheme.settings.accent
-    assign ground = scheme.settings.background
+    assign raw_accent = scheme.settings.accent
+    assign raw_accent_2 = scheme.settings.accent_2
+
+    assign accent = raw_accent
+    assign accent_2 = raw_accent_2
+    assign button = scheme.settings.button
+    assign button_label = scheme.settings.button_label
+    assign button_hover = scheme.settings.button_hover
+
+    unless dark
+      comment
+        Light is the shipped design, so nothing is derived here at all: the
+        palette is used exactly as the merchant set it, as it always was.
+      endcomment
+      assign ground = scheme.settings.background
+      assign ink = scheme.settings.text
+      assign surface = scheme.settings.surface
+
+      assign accent_600 = accent | color_darken: 6
+      assign accent_700 = accent | color_darken: 14
+      assign accent_800 = accent | color_darken: 21
+      assign accent_900 = accent | color_darken: 29
+      assign accent_2_700 = accent_2 | color_darken: 14
+    else
+      comment
+        Ground and ink trade places outright. The surface is lifted off the new
+        ground by the same small step the light schemes keep between their own
+        background and surface, which is what makes image frames and panels
+        read as a layer rather than as a block.
+      endcomment
+      assign ground = scheme.settings.text
+      assign ink = scheme.settings.background
+      assign surface = scheme.settings.text | color_lighten: 6
+
+      comment
+        Turning a scheme over changes which ground its accent has to sit on, so
+        the accent is re-aimed at the ground it actually lands on rather than
+        at the mode. That distinction is the whole thing: a scheme built dark
+        to begin with — the one the design uses for its inverted sections —
+        turns over into a *light* scheme, and treating it as dark because the
+        shop is in dark mode leaves a pale accent on a pale ground.
+
+        Perceived brightness decides both the direction and the distance, so
+        this behaves the same for a navy as for a forest green.
+      endcomment
+      assign ground_bright = ground | color_brightness
+      assign accent_bright = raw_accent | color_brightness
+      assign accent_2_bright = raw_accent_2 | color_brightness
+
+      if ground_bright < 128
+        assign accent_lift = 23
+        if accent_bright < 90
+          assign accent_lift = 34
+        elsif accent_bright > 170
+          assign accent_lift = 0
+        endif
+        assign accent = raw_accent | color_lighten: accent_lift
+
+        assign accent_2_lift = 18
+        if accent_2_bright < 90
+          assign accent_2_lift = 30
+        elsif accent_2_bright > 170
+          assign accent_2_lift = 0
+        endif
+        assign accent_2 = raw_accent_2 | color_lighten: accent_2_lift
+
+        comment
+          The ramp steps away from the ground. Darkening an accent that sits on
+          a dark ground buries it, so here the upper steps lighten.
+        endcomment
+        assign accent_600 = accent | color_lighten: 6
+        assign accent_700 = accent | color_lighten: 14
+        assign accent_800 = accent | color_lighten: 21
+        assign accent_900 = accent | color_lighten: 29
+        assign accent_2_700 = accent_2 | color_lighten: 14
+      else
+        assign accent_drop = 0
+        if accent_bright > 170
+          assign accent_drop = 23
+        elsif accent_bright > 128
+          assign accent_drop = 10
+        endif
+        assign accent = raw_accent | color_darken: accent_drop
+
+        assign accent_2_drop = 0
+        if accent_2_bright > 170
+          assign accent_2_drop = 18
+        elsif accent_2_bright > 128
+          assign accent_2_drop = 8
+        endif
+        assign accent_2 = raw_accent_2 | color_darken: accent_2_drop
+
+        assign accent_600 = accent | color_darken: 6
+        assign accent_700 = accent | color_darken: 14
+        assign accent_800 = accent | color_darken: 21
+        assign accent_900 = accent | color_darken: 29
+        assign accent_2_700 = accent_2 | color_darken: 14
+      endif
+
+      comment
+        A solid button is left alone when its colour can carry itself — a brand
+        red is still the brand red in the dark. It is only turned over when it
+        would land too close to the ground to be seen, which is what happens to
+        a button that was taking the scheme's ink. Comparing the two
+        brightnesses catches that in both directions: a dark button on a dark
+        page, and the pale button of an inverted scheme on its new pale ground.
+      endcomment
+      assign button_gap = button | color_brightness | minus: ground_bright | abs
+      if button_gap < 60
+        assign button = ink
+        assign button_label = ground
+        assign button_hover = accent
+      endif
+    endunless
+
+    comment
+      What reads on top of an accent — the bag count, the sage badges. White in
+      light mode, which is the shipped design. In dark mode the accents are
+      lifted to carry on a dark ground, and white on a lifted accent is not
+      readable, so the label instead takes whichever end of the scheme — its
+      ground or its ink — stands furthest from the accent in brightness. Those
+      two are always a light and a dark, so one of them always works.
+    endcomment
+    assign on_accent = '#ffffff'
+    assign on_accent_2 = '#ffffff'
+
+    if dark
+      assign g_b = ground | color_brightness
+      assign i_b = ink | color_brightness
+
+      assign a_b = accent | color_brightness
+      assign gap_ground = a_b | minus: g_b | abs
+      assign gap_ink = a_b | minus: i_b | abs
+      assign on_accent = ground
+      if gap_ink > gap_ground
+        assign on_accent = ink
+      endif
+
+      assign a2_b = accent_2 | color_brightness
+      assign gap_ground_2 = a2_b | minus: g_b | abs
+      assign gap_ink_2 = a2_b | minus: i_b | abs
+      assign on_accent_2 = ground
+      if gap_ink_2 > gap_ground_2
+        assign on_accent_2 = ink
+      endif
+    endif
+
+    comment
+      Steps 100-400 mix toward whichever ground is in force, so the tint ramp
+      stays quiet either way up.
+    endcomment
     assign accent_100 = accent | color_mix: ground, 6
     assign accent_200 = accent | color_mix: ground, 20
     assign accent_300 = accent | color_mix: ground, 41
     assign accent_400 = accent | color_mix: ground, 65
-    assign accent_600 = accent | color_darken: 6
-    assign accent_700 = accent | color_darken: 14
-    assign accent_800 = accent | color_darken: 21
-    assign accent_900 = accent | color_darken: 29
-    assign accent_2_700 = scheme.settings.accent_2 | color_darken: 14
   -%}
   {%- comment -%}
     The *-rgb tokens must be comma separated, because the stylesheet feeds
@@ -38,11 +196,11 @@
   {%- endcomment -%}
   {% if forloop.first %}:root,{% endif %}
   .color-{{ scheme.id }} {
-    --color-bg: {{ scheme.settings.background }};
-    --color-bg-rgb: {{ scheme.settings.background.red }}, {{ scheme.settings.background.green }}, {{ scheme.settings.background.blue }};
-    --color-surface: {{ scheme.settings.surface }};
-    --color-text: {{ scheme.settings.text }};
-    --color-text-rgb: {{ scheme.settings.text.red }}, {{ scheme.settings.text.green }}, {{ scheme.settings.text.blue }};
+    --color-bg: {{ ground }};
+    --color-bg-rgb: {{ ground.red }}, {{ ground.green }}, {{ ground.blue }};
+    --color-surface: {{ surface }};
+    --color-text: {{ ink }};
+    --color-text-rgb: {{ ink.red }}, {{ ink.green }}, {{ ink.blue }};
     --color-divider: rgba(var(--color-text-rgb), {{ settings.divider_opacity | divided_by: 100.0 }});
 
     --color-accent: {{ accent }};
@@ -56,9 +214,11 @@
     --color-accent-700: {{ accent_700 }};
     --color-accent-800: {{ accent_800 }};
     --color-accent-900: {{ accent_900 }};
-    --color-accent-2: {{ scheme.settings.accent_2 }};
-    --color-accent-2-500: {{ scheme.settings.accent_2 }};
+    --color-accent-2: {{ accent_2 }};
+    --color-accent-2-500: {{ accent_2 }};
     --color-accent-2-700: {{ accent_2_700 }};
+    --on-accent: {{ on_accent }};
+    --on-accent-2: {{ on_accent_2 }};
 
     {%- comment -%}
       Solid buttons carry their own colours per scheme rather than borrowing
@@ -67,10 +227,10 @@
       still follow the scheme's text colour, which is what makes them read as
       secondary.
     {%- endcomment -%}
-    --color-button: {{ scheme.settings.button }};
-    --color-button-rgb: {{ scheme.settings.button.red }}, {{ scheme.settings.button.green }}, {{ scheme.settings.button.blue }};
-    --color-button-text: {{ scheme.settings.button_label }};
-    --color-button-hover: {{ scheme.settings.button_hover }};
+    --color-button: {{ button }};
+    --color-button-rgb: {{ button.red }}, {{ button.green }}, {{ button.blue }};
+    --color-button-text: {{ button_label }};
+    --color-button-hover: {{ button_hover }};
 
     --ink-60: rgba(var(--color-text-rgb), 0.6);
     --ink-70: rgba(var(--color-text-rgb), 0.7);
@@ -79,6 +239,13 @@
 {%- endfor -%}
 
 :root {
+  {%- comment -%}
+    Tells the browser which way up the page is, so the parts it draws itself —
+    scrollbars, select menus, date pickers, field spinners — come out to match
+    instead of staying stubbornly white against a dark page.
+  {%- endcomment -%}
+  color-scheme: {% if dark %}dark{% else %}light{% endif %};
+
   --font-body: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
   --font-body-style: {{ settings.type_body_font.style }};
   --font-body-weight: {{ settings.type_body_font.weight }};

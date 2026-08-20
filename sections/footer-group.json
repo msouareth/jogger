@@ -31,18 +31,32 @@
           "type": "menu",
           "settings": {
             "heading": "Help",
-            "menu": "footer"
+            "menu": "footer-help"
           }
         },
         "house": {
           "type": "menu",
           "settings": {
             "heading": "House",
-            "menu": "footer"
+            "menu": "footer-house"
+          }
+        },
+        "contact": {
+          "type": "contact",
+          "settings": {
+            "heading": "Find us",
+            "address": "Rua de Miguel Bombarda 22\n4050-377 Porto\nPortugal",
+            "hours": "Tuesday to Saturday, 11–19"
           }
         }
       },
-      "block_order": ["brand", "shop", "help", "house"],
+      "block_order": [
+        "brand",
+        "shop",
+        "help",
+        "house",
+        "contact"
+      ],
       "settings": {
         "tagline": "Porto · London",
         "show_payment_icons": true,
@@ -50,5 +64,8 @@
       }
     }
   },
-  "order": ["newsletter", "footer"]
+  "order": [
+    "newsletter",
+    "footer"
+  ]
 }

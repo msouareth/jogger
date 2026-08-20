@@ -1,0 +1,387 @@
+{%- comment -%}
+  A band of round logos travelling steadily across the page.
+
+  The movement is the theme's own ticker: jogger.js repeats the track's contents
+  once and the keyframe walks it exactly half its width, so the loop closes on
+  itself and the join is never visible. Because the copies are the same logos a
+  second time, the track is decorative — the plain list beneath it is what is
+  actually read out.
+{%- endcomment -%}
+
+<div class="scheme color-{{ section.settings.color_scheme }}">
+  {%- if section.blocks.size > 0 -%}
+    {%- capture label_style %}{% render 'text-style', s: section.settings, key: 'label' %}{% endcapture -%}
+    {%- capture heading_style %}{% render 'text-style', s: section.settings, key: 'heading' %}{% endcapture -%}
+
+    {%- comment -%}
+      The ring's colour is only written when one has been chosen. An empty
+      colour setting renders as nothing, and `--ring-color: ;` is not the same
+      as leaving the property alone — an empty value is a valid one, so var()
+      would take it in place of its fallback and the ring would lose its colour
+      entirely rather than falling back to the scheme's divider.
+    {%- endcomment -%}
+    {%- liquid
+      assign ring = ''
+      assign ring_width = section.settings.ring_width | default: 1
+      assign ring = ring | append: '--ring:' | append: ring_width | append: 'px;'
+
+      if section.settings.ring_color != blank
+        assign ring = ring | append: '--ring-color:' | append: section.settings.ring_color | append: ';'
+      endif
+    -%}
+
+    <div
+      class="brands"
+      style="--tick-speed: {{ section.settings.speed | default: 46 }}s; --ball: {{ section.settings.size | default: 120 }}px;{{ ring }}"
+    >
+      {%- if section.settings.label != blank or section.settings.heading != blank -%}
+        <div class="wrap brands-head rv">
+          {%- if section.settings.label != blank -%}
+            <p class="lab" style="{{ label_style }}">{{ section.settings.label | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="h2" style="{{ heading_style }}">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- liquid
+        assign ball_class = 'ball'
+        if section.settings.fit == 'cover'
+          assign ball_class = 'ball ball--cover'
+        endif
+
+        assign drifting = false
+        if section.settings.motion == 'float'
+          assign drifting = true
+        endif
+      -%}
+
+      {%- capture balls -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.link != blank -%}
+            <a
+              class="{{ ball_class }}"
+              href="{{ block.settings.link }}"
+              {% unless drifting %}tabindex="-1"{% endunless %}
+              {{ block.shopify_attributes }}
+            >
+              {% render 'media', image: block.settings.image, placeholder: 'image', alt: block.settings.name %}
+            </a>
+          {%- else -%}
+            <span class="{{ ball_class }}" {{ block.shopify_attributes }}>
+              {% render 'media', image: block.settings.image, placeholder: 'image', alt: block.settings.name %}
+            </span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- comment -%}
+        Two ways of moving, and they are different enough to be different
+        elements rather than one element with a class on it. The line is a
+        track that is repeated and walked; the loose one is a closed box its
+        logos are scattered and set adrift inside, where repeating them would
+        mean drawing every logo twice over.
+
+        Only the line is decorative in the accessibility sense: it holds each
+        logo twice, so it is hidden and the plain list below speaks for it. The
+        loose box holds each logo once, so its links are real links and stay in
+        the tab order.
+      {%- endcomment -%}
+      {%- if drifting -%}
+        <div
+          class="brand-float"
+          data-brand-float
+          data-float-speed="{{ section.settings.float_speed | default: 18 }}"
+          style="--float-h: {{ section.settings.float_height | default: 360 }}px;"
+        >
+          {{ balls }}
+        </div>
+      {%- else -%}
+        <div class="brand-run tick-run" aria-hidden="true">
+          {{ balls }}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%}
+        The band's real content, for anyone who cannot see it go by. Named
+        brands become links where the merchant set one, so the list is usable
+        rather than merely present. Only needed for the line, whose own logos
+        are hidden; the loose box already holds them once and reachably.
+      {%- endcomment -%}
+      <ul class="visually-hidden"{% if drifting %} hidden{% endif %}>
+        {%- for block in section.blocks -%}
+          {%- assign brand_name = block.settings.name | default: block.settings.image.alt -%}
+          {%- if brand_name != blank -%}
+            <li>
+              {%- if block.settings.link != blank -%}
+                <a href="{{ block.settings.link }}">{{ brand_name | escape }}</a>
+              {%- else -%}
+                {{ brand_name | escape }}
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Brand band",
+  "tag": "section",
+  "class": "section-brands",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "motion",
+      "label": "How they move",
+      "info": "In a line sends them travelling steadily across the page. Loose scatters them inside a closed area where they drift about and bounce off the walls and off each other.",
+      "options": [
+        {
+          "value": "line",
+          "label": "In a line, travelling across"
+        },
+        {
+          "value": "float",
+          "label": "Loose, drifting in an area"
+        }
+      ],
+      "default": "line"
+    },
+    {
+      "type": "range",
+      "id": "size",
+      "label": "Circle size",
+      "min": 60,
+      "max": 220,
+      "step": 10,
+      "unit": "px",
+      "default": 120,
+      "info": "The size on a screen with room for it. In the loose area a circle is brought down when the box could not otherwise hold them all with space to drift — so a size chosen on a laptop does not leave a phone jammed solid."
+    },
+    {
+      "type": "select",
+      "id": "fit",
+      "label": "How the image sits in the circle",
+      "info": "Inside is right for logos: the whole mark is kept and given room to breathe. Filling suits photographs, where cropping to the circle is the point.",
+      "options": [
+        {
+          "value": "contain",
+          "label": "Inside the circle, whole"
+        },
+        {
+          "value": "cover",
+          "label": "Filling the circle, cropped"
+        }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "range",
+      "id": "ring_width",
+      "label": "Ring thickness",
+      "info": "A line drawn around each circle. Zero removes it. The ring is drawn inside the circle rather than around it, so the circles keep the size you set and the rings never touch before the circles do.",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "ring_color",
+      "label": "Ring colour",
+      "info": "Leave empty to follow the colour scheme, which keeps the ring in step if you change scheme later."
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Seconds per loop",
+      "info": "For the line only. Higher is slower. The band pauses while the pointer is over it, so a logo can be clicked without chasing it.",
+      "min": 20,
+      "max": 120,
+      "step": 2,
+      "unit": "s",
+      "default": 46
+    },
+    {
+      "type": "range",
+      "id": "float_speed",
+      "label": "Drift speed",
+      "info": "For the loose area only. Pixels a second. Around 18 is an idle wander; past 40 they start to look busy.",
+      "min": 4,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "float_height",
+      "label": "Area height",
+      "info": "For the loose area only. How tall the box they drift inside is. Give them room — a shallow area with large circles leaves nowhere to go.",
+      "min": 200,
+      "max": 640,
+      "step": 20,
+      "unit": "px",
+      "default": 360
+    },
+    {
+      "type": "header",
+      "content": "Label type"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    },
+    {
+      "type": "header",
+      "content": "Heading type"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "accent",
+          "label": "Accent font"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 50,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Colour",
+      "info": "Leave empty to follow the colour scheme."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "info": "Read out in place of the picture, and listed for anyone who cannot see the band."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand band",
+      "blocks": [
+        {
+          "type": "brand"
+        },
+        {
+          "type": "brand"
+        },
+        {
+          "type": "brand"
+        },
+        {
+          "type": "brand"
+        },
+        {
+          "type": "brand"
+        },
+        {
+          "type": "brand"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
