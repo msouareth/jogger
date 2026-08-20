@@ -24,3 +24,7 @@ the home page Product grid. Add a hero image. That's a working store.
 
 Then open **Theme settings**, try the three theme styles, and set the accent
 colour to yours — the whole palette regenerates from it.
+
+---
+
+Jogger is designed and built by [mundo.dev](https://mundo.dev).

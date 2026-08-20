@@ -51,6 +51,51 @@ The save/heart feature stores items in the visitor's own browser. Clearing
 browser data, or switching device or browser, clears them. It's a convenience
 wishlist, not an account-backed one — no data reaches your store.
 
+## My header text has gone invisible
+
+Almost always a colour set in **Header → Bar colours → Menu, icons and
+wordmark**. That colour is used everywhere, including where the bar sits on the
+page's own background — so white set there disappears against a pale page.
+
+Clear the field. Empty means it follows your colour scheme, which is the safe
+setting. If what you wanted was light labels only while the bar floats over a
+hero picture, use **Over a hero picture** instead — that is what it is for.
+
+## A footer column has vanished
+
+Columns with nothing in them are hidden on the live shop rather than left as a
+heading over empty space. The usual cause is a menu column pointing at a menu
+that has not been built yet.
+
+In the theme editor the column stays visible and says so, so you can still select
+it. Build the menu in **Content → Menus**, then pick it in the block.
+
+## The contact form goes to the wrong inbox
+
+It goes wherever your store's contact email points — nothing about it is set in
+the theme, and no address is stored here. Change it in your Shopify settings and
+the form follows.
+
+The newsletter is not email at all: it adds the subscriber to your customer list
+with marketing consent, where you will find them under **Customers**.
+
+## The hero text and the scroll cue are crowding each other
+
+Both default to the foot of the picture. Move the text up with **Text position —
+down**, or send the cue to one side with **Scroll cue**, or turn the cue off.
+
+On a phone there is no room for both, so hero text sitting at the foot is lifted
+to make space automatically.
+
+## The brand circles do not move
+
+In the loose layout they need somewhere to go. If the circles cover much more
+than a third of the area they jostle instead of drifting.
+
+Raise **Area height**, lower **Circle size**, or use fewer logos. On a narrow
+screen the theme already brings the size down for you — a size chosen on a laptop
+would otherwise arrive unchanged on a phone and jam it solid.
+
 ## Can I add a second colour scheme band?
 
 Yes. Every home section, the footer, ticker and newsletter have a **Colour

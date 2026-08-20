@@ -1,16 +1,10 @@
 # Support
 
-The theme editor's **Support** button points here, so this page is where a
-merchant lands when something has gone wrong. Keep it short and keep it
-current — the address below has to be one you actually read.
-
-> **Before you publish this page, replace the address below with your own.**
-> Shopify checks that this link works during theme review, and a merchant who
-> emails a placeholder gets nothing back.
+Jogger is built and supported by [mundo.dev](https://mundo.dev).
 
 ## Getting help
 
-Email **mundo.dev.support@example.com** and include:
+Email **support@mundo.dev** and include:
 
 - your store's `.myshopify.com` address
 - the theme version, from **Theme settings → the panel at the top**

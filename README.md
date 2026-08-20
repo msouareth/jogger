@@ -184,7 +184,11 @@ Evergreen Chrome, Edge, Firefox and Safari. Layout uses grid, `aspect-ratio`,
 `clamp()` and custom properties; `backdrop-filter` is progressive enhancement and
 degrades to a solid background.
 
+## Who makes it
+
+Jogger is designed and built by **[mundo.dev](https://mundo.dev)**.
+
 ## Licence
 
-Copyright © 2026. All rights reserved. This theme is sold as a commercial
-product; it is not open source.
+Copyright © 2026 mundo.dev. All rights reserved. This theme is sold as a
+commercial product; it is not open source.

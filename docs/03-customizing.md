@@ -18,6 +18,25 @@ At the very top you'll find three one-click styles:
 Picking one replaces your colour, type and geometry settings in one move. Start
 from whichever is closest, then adjust.
 
+## Light or dark
+
+**Theme settings → Colours → Colour mode.**
+
+Dark turns the whole shop over. It is not a second set of colours to maintain —
+every scheme swaps its ground and its text, and the accents are lifted so they
+still carry on the darker ground. Your colours stay exactly as you set them; you
+are choosing which way up they are used.
+
+That means a brand colour picked once is still the brand colour in either mode,
+and there is no second palette to keep in step.
+
+One thing worth knowing: a scheme built dark to begin with — the inverted band
+the design uses to break up a page — turns over into a *light* one. The page
+keeps its rhythm of alternating sections, just the other way round.
+
+The browser is told which way up the page is, so scrollbars, select menus and
+date pickers come out to match instead of staying stubbornly white.
+
 ## Colour schemes
 
 Jogger uses **colour schemes** rather than one flat palette. Each scheme is a set
@@ -145,6 +164,20 @@ These set the defaults everything inherits from.
 - **Corner radius** — applies to image frames and panels. `0` is hard and
   modernist, `16`+ is soft and contemporary. Buttons and chips always stay fully
   rounded by design.
+
+## Dividers
+
+**Theme settings → Colours → Divider strength** sets how visible the hairlines
+are — the rules between rows, around cards and under the header. It is a
+percentage of your text colour, so it stays in key whatever scheme you use.
+
+## Favicon and sharing
+
+**Theme settings → Brand.**
+
+- **Favicon** — the small icon in the browser tab. Square, 32px or larger.
+- **Social sharing image** — what appears when a link to your shop is pasted into
+  a message or a post. Landscape, around 1200 × 630.
 
 ## Motion
 
